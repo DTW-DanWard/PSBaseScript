@@ -76,10 +76,10 @@ task Test Init, {
   If ($env:BHBuildSystem -eq 'AppVeyor') {
     (New-Object 'System.Net.WebClient').UploadFile(
       "https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)",
-      "$ProjectRoot\$TestFile" )
+      (Join-Path -Path $ProjectRoot -ChildPath $TestFile))
   }
 
-  Remove-Item "$ProjectRoot\$TestFile" -Force -ErrorAction SilentlyContinue
+  Remove-Item (Join-Path -Path $ProjectRoot -ChildPath $TestFile) -Force -ErrorAction SilentlyContinue
 
   # code coverage badge changes and helper function adapted from:
   # http://wragg.io/add-a-code-coverage-badge-to-your-powershell-deployment-pipeline/
