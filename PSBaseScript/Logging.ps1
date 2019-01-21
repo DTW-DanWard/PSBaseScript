@@ -2,7 +2,8 @@
 # Core logging functionality; functions that use or modify any logging internal variables
 # should be located in this script.  Put helper/output functions in Logging-Utils.psm1.
 
-function Initialize {
+#region Function:
+function Invoke-InitializeLogSettings {
   [CmdletBinding()]
   param()
   process {
@@ -28,10 +29,10 @@ function Initialize {
     [string]$script:HeaderFooterBarChar = '#'
   }
 }
+#endregion
 
 
-Initialize
-
+Invoke-InitializeLogSettings
 
 
 #region Functions: Disable-XYZLogFile, Enable-XYZLogFile, Get-XYZLogFilePath
@@ -166,7 +167,7 @@ function Write-Log {
     # if nothing passed, return
     else { return }
 
-    # asdf fix 
+    # asdf fix
 
     if ($false) { # (Confirm-XYZLogSpecialType $ObjectToWrite) {
       # Write-XYZSpecialTypeToHost @PSBoundParameters
@@ -188,7 +189,7 @@ function Write-Log {
       # only write content to console if $OutSilent -eq $false
       if ($script:OutSilent -eq $false) {
         # get reference to the actual cmdlet Write-Host, not our function
-        $Cmd = Get-Command -Name "Write-Host" -CommandType Cmdlet
+        $Cmd = Get-Command -Name 'Write-Host' -CommandType Cmdlet
         & $Cmd @PSBoundParameters
       }
       #endregion
@@ -236,6 +237,82 @@ function Remove-XYZLogIndentLevel {
   #endregion
   process {
     if ($IndentLevel -gt 0) { $script:IndentLevel -= 1 }
+  }
+}
+#endregion
+
+
+#region Functions: Write-XYZLogHeader, Write-XYZLogFooter
+
+<#
+.SYNOPSIS
+Writes script header information to Write-Log
+.DESCRIPTION
+Writes script header informatino to Write-Log including script
+name and path, machine name, domain/user name and start time.
+Additionally displays any information pass in via hashtable parameter.
+Information is surrounded with 'bars' of # marks.
+.EXAMPLE
+Write-XYZLogHeader
+Writes the log header with information
+#>
+function Write-XYZLogHeader {
+  #region Function parameters
+  [CmdletBinding()]
+  param()
+  #endregion
+  process {
+    #region Write header
+    Write-Log ' '
+    [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
+    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-Log $($FormatString -f "Script Name",$HostScriptName)
+    Write-Log $($FormatString -f "Log file",$LogFilePath)
+    Write-Log $($FormatString -f "Machine",$env:COMPUTERNAME)
+    Write-Log $($FormatString -f "User",($env:USERDOMAIN + "\" + $env:USERNAME))
+    Write-Log $($FormatString -f "Start time",$StartTime)
+
+    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    #endregion
+    #endregion
+  }
+}
+
+
+<#
+.SYNOPSIS
+Writes script footer information to Write-Log
+.DESCRIPTION
+Writes script footer informatino to Write-Log including script
+name and path and end time.
+Information is surrounded with 'bars' of # marks.
+.EXAMPLE
+Write-XYZLogFooter
+Writes the log footer with information
+#>
+function Write-XYZLogFooter {
+  #region Function parameters
+  [CmdletBinding()]
+  param()
+  #endregion
+  process {
+    [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
+    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-Log $($FormatString -f "Script Name",$HostScriptName)
+    Write-Log $($FormatString -f "Log file",$LogFilePath)
+
+    $EndTime = Get-Date
+    Write-Log $($FormatString -f "End time",$EndTime)
+    # determine duration and display
+    $Duration = $EndTime - $StartTime
+    [string]$DurationDisplay = ''
+    if ($Duration.Days -gt 0) { $DurationDisplay += $Duration.Days.ToString() + " days, " }
+    if ($Duration.Hours -gt 0) { $DurationDisplay += $Duration.Hours.ToString() + " hours, " }
+    if ($Duration.Minutes -gt 0) { $DurationDisplay += $Duration.Minutes.ToString() + " minutes, " }
+    if ($Duration.Seconds -gt 0) { $DurationDisplay += $Duration.Seconds.ToString() + " seconds" }
+    Write-Log $($FormatString -f "Duration",$DurationDisplay)
+    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-Log ' '
   }
 }
 #endregion
