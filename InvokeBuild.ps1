@@ -16,9 +16,8 @@ if (-not $ProjectRoot) {
   $ProjectRoot = $PSScriptRoot
 }
 
-# module path is NOT set for script projects; set now
+# module path is NOT set by default for script projects so set now
 $env:BHModulePath = Join-Path -Path $env:BHProjectPath -ChildPath $env:BHProjectName
-
 
 $Timestamp = "{0:yyyyMMdd-HHmmss}" -f (Get-Date)
 $PSVersion = $PSVersionTable.PSVersion.Major

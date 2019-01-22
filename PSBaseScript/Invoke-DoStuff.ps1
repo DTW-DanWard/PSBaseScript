@@ -27,10 +27,13 @@ Disable-XYZLogFile
 <#
 
 Start Unit testing
+  Get older version of get-sourcescriptpath without parent path
 
 Migrate LoggingUtils.psm1
 
 Change -Silent to -Quiet ?
+
+Search asdf
 
 #
 In Write-Log, enable Write-PSFSpecialTypeToHost
