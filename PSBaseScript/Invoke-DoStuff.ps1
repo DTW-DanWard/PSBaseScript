@@ -10,6 +10,8 @@ Add-XYZLogIndentLevel
 
 Write-Log "$(Get-XYZLogFilePath)"
 
+Start-Sleep -sec 5
+
 Add-XYZLogIndentLevel
 Write-Log "Hey now!"
 Remove-XYZLogIndentLevel
@@ -27,6 +29,8 @@ Disable-XYZLogFile
 Start Unit testing
 
 Migrate LoggingUtils.psm1
+
+Change -Silent to -Quiet ?
 
 #
 In Write-Log, enable Write-PSFSpecialTypeToHost

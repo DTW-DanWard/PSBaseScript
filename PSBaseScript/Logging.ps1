@@ -232,11 +232,13 @@ Decreases indenting level by 1
 #>
 function Remove-XYZLogIndentLevel {
   #region Function parameters
-  [CmdletBinding()]
+  [CmdletBinding(supportsshouldprocess)]
   param()
   #endregion
   process {
-    if ($IndentLevel -gt 0) { $script:IndentLevel -= 1 }
+    if ($PSCmdlet.ShouldProcess("This should process")) {
+      if ($IndentLevel -gt 0) { $script:IndentLevel -= 1 }
+    }
   }
 }
 #endregion
