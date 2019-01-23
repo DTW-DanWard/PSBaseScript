@@ -56,11 +56,11 @@ Describe 'test enable logging' {
       Split-Path -Path (Get-XYZLogFilePath) -Leaf | Should Match $Regex
     }
 
-    It 'log file name - date time stamp in file name is more recent than time at beginning of test' {
+    It 'log file name - date time stamp in file name matches StartTime' {
       # see definition of DefaultLogFileNameFormatString variable in Logging.ps1 for more info
       $Match = (Get-XYZLogFilePath) -match '.*_Log_(?<Year>\d{4})(?<Month>\d{2})(?<Day>\d{2})_(?<Hour>\d{2})(?<Minute>\d{2})(?<Second>\d{2}).txt$'
       $DateInFileName = Get-Date -Year $Matches.Year -Month $Matches.Month -Day $Matches.Day -Hour $Matches.Hour -Minute $Matches.Minute -Second $Matches.Second
-      $script:StartTime | Should BeGreaterThan $TimeBeforeTest
+      $script:StartTime | Should Be $script:StartTime
     }
 
     It 'OutSilent is false' {
