@@ -10,7 +10,25 @@ Describe "Re/loading: $SourceScript" { }
 #endregion
 
 
-#region Tests add/remove indent level
+
+
+#region Test get log file path
+Describe 'get log file path' {
+  It 'gets non-initialized log file path value of null' {
+    $script:LogFilePath = $null
+    Get-XYZLogFilePath | Should BeNullOrEmpty
+  }
+
+  It 'gets initialized log file path' {
+    $InitialValue = 'c:\Temp\LogFile.txt'
+    $script:LogFilePath = $InitialValue
+    Get-XYZLogFilePath | Should Be $InitialValue
+  }
+}
+#endregion
+
+
+#region Test add/remove indent level
 Describe 'add and remove indent level' {
   It 'adds 1 and equals 1 with initial default value 0' {
     $InitialValue = 0
@@ -33,7 +51,7 @@ Describe 'add and remove indent level' {
     $script:IndentLevel | Should Be ($InitialValue - 1)
   }
 
-  It 'does not remove 1 when starting with value of 0' {
+  It 'does not remove 1 with initial value of 0' {
     $InitialValue = 0
     $script:IndentLevel = $InitialValue
     Remove-XYZLogIndentLevel

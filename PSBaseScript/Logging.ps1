@@ -11,7 +11,7 @@ function Invoke-InitializeLogSettings {
     [string]$script:HostScriptName = ''
 
     # defaults for log file
-    [string]$script:LogFilePath = $null
+    $script:LogFilePath = $null
     [hashtable]$script:OutFileSettings = @{ Encoding = 'utf8'; Force = $true; Append = $true }
     [string]$script:DefaultLogFileNameFormatString = '{0}_Log_{1:yyyyMMdd_HHmmss}.txt'
     [bool]$script:OutSilent = $false
@@ -35,7 +35,7 @@ function Invoke-InitializeLogSettings {
 Invoke-InitializeLogSettings
 
 
-#region Functions: Disable-XYZLogFile, Enable-XYZLogFile, Get-XYZLogFilePath
+#region Functions: Disable-XYZLogFile, Enable-XYZLogFile
 
 <#
 .SYNOPSIS
@@ -104,7 +104,10 @@ function Enable-XYZLogFile {
     #endregion
   }
 }
+#endregion
 
+
+#region Functions: Get-XYZLogFilePath
 
 <#
 .SYNOPSIS
