@@ -11,18 +11,77 @@ Describe "Re/loading: $SourceScript" { }
 
 
 
+#region Test disable logging
+Describe 'test disable logging' {
+  Context 'test disable logging when logging not originally enabled' {
+    BeforeAll { 
+      Invoke-InitializeLogSettings
+      Disable-XYZLogFile
+    }
+
+    It 'test indent level is 0' {
+      $script:IndentLevel | Should Be 0
+    }
+
+    It 'test log file path is null' {
+      Get-XYZLogFilePath | Should BeNullOrEmpty
+    }
+  }
+
+  Context 'test disable logging when logging enabled - direct' {
+    BeforeAll { 
+      Invoke-InitializeLogSettings
+      # because setting directly, this can be a file - or just anything not null
+      $TestLogFilePath = Join-Path -Path $TestDrive -ChildPath TestLogFile.txt
+      $script:LogFilePath = $TestLogFilePath
+      $TestIndentLevel = 5
+      $script:IndentLevel = $TestIndentLevel
+      Disable-XYZLogFile
+    }
+
+    It 'test indent level is 0' {
+      $script:IndentLevel | Should Be 0
+    }
+
+    It 'test log file path is null' {
+      Get-XYZLogFilePath | Should BeNullOrEmpty
+    }
+  }
+
+  Context 'test disable logging when logging enabled - API' {
+    BeforeAll { 
+      Invoke-InitializeLogSettings
+      # because using API, this must be an actual folder that exists
+      $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+      $null = New-Item -Path $TestLogFolderPath -ItemType Directory
+      Disable-XYZLogFile
+    }
+
+    It 'test indent level is 0' {
+      $script:IndentLevel | Should Be 0
+    }
+
+    It 'test log file path is null' {
+      Get-XYZLogFilePath | Should BeNullOrEmpty
+    }
+  }
+}
+#endregion
+
+
+
 
 #region Test get log file path
 Describe 'get log file path' {
-  It 'gets non-initialized log file path value of null' {
+  It 'gets uninitialized log file path value of null' {
     $script:LogFilePath = $null
     Get-XYZLogFilePath | Should BeNullOrEmpty
   }
 
   It 'gets initialized log file path' {
-    $InitialValue = 'c:\Temp\LogFile.txt'
-    $script:LogFilePath = $InitialValue
-    Get-XYZLogFilePath | Should Be $InitialValue
+    $TestLogFilePath = 'c:\Temp\LogFile.txt'
+    $script:LogFilePath = $TestLogFilePath
+    Get-XYZLogFilePath | Should Be $TestLogFilePath
   }
 }
 #endregion
@@ -31,31 +90,31 @@ Describe 'get log file path' {
 #region Test add/remove indent level
 Describe 'add and remove indent level' {
   It 'adds 1 and equals 1 with initial default value 0' {
-    $InitialValue = 0
-    $script:IndentLevel = $InitialValue
+    $TestIndentLevel = 0
+    $script:IndentLevel = $TestIndentLevel
     Add-XYZLogIndentLevel
-    $script:IndentLevel | Should Be ($InitialValue + 1)
+    $script:IndentLevel | Should Be ($TestIndentLevel + 1)
   }
 
   It 'adds 1 and equals n+1 with initial value n (non-zero)' {
-    $InitialValue = 5
-    $script:IndentLevel = $InitialValue
+    $TestIndentLevel = 5
+    $script:IndentLevel = $TestIndentLevel
     Add-XYZLogIndentLevel
-    $script:IndentLevel | Should Be ($InitialValue + 1)
+    $script:IndentLevel | Should Be ($TestIndentLevel + 1)
   }
 
   It 'removes 1 and equals n-1 with initial value n (greater than zero)' {
-    $InitialValue = 5
-    $script:IndentLevel = $InitialValue
+    $TestIndentLevel = 5
+    $script:IndentLevel = $TestIndentLevel
     Remove-XYZLogIndentLevel
-    $script:IndentLevel | Should Be ($InitialValue - 1)
+    $script:IndentLevel | Should Be ($TestIndentLevel - 1)
   }
 
   It 'does not remove 1 with initial value of 0' {
-    $InitialValue = 0
-    $script:IndentLevel = $InitialValue
+    $TestIndentLevel = 0
+    $script:IndentLevel = $TestIndentLevel
     Remove-XYZLogIndentLevel
-    $script:IndentLevel | Should Be ($InitialValue)
+    $script:IndentLevel | Should Be ($TestIndentLevel)
   }
 }
 #endregion

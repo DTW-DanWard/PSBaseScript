@@ -55,9 +55,6 @@ function Disable-XYZLogFile {
     # make sure log level is reset
     $script:IndentLevel = 0
 
-    # if not currently logging, then just return
-    if ((Get-XYZLogFilePath) -eq '') { return }
-
     # turn off file logging by setting path to null
     $script:LogFilePath = $null
   }
@@ -94,6 +91,9 @@ function Enable-XYZLogFile {
     $script:StartTime = Get-Date
     # get parent script name/path
     $script:HostScriptName = Split-Path ($MyInvocation.PSCommandPath) -Leaf
+
+    # make sure log level is reset
+    $script:IndentLevel = 0
 
     # set log file path
     $LogFileName = $script:DefaultLogFileNameFormatString -f $script:HostScriptName, $script:StartTime
@@ -156,10 +156,10 @@ function Write-Log {
   #region Function parameters
   [CmdletBinding()]
   param(
-    [Parameter(Mandatory = $false,ValueFromPipeline = $true,
-      ValueFromPipelineByPropertyName = $false,Position = 1)]
+    [Parameter(Mandatory = $false, ValueFromPipeline = $true,
+      ValueFromPipelineByPropertyName = $false, Position = 1)]
     $Object,
-    [Parameter(Mandatory = $false,ValueFromPipeline = $false)]
+    [Parameter(Mandatory = $false, ValueFromPipeline = $false)]
     [switch]$NoNewline
   )
   #endregion
@@ -172,7 +172,8 @@ function Write-Log {
 
     # asdf fix
 
-    if ($false) { # (Confirm-XYZLogSpecialType $ObjectToWrite) {
+    if ($false) {
+      # (Confirm-XYZLogSpecialType $ObjectToWrite) {
       # Write-XYZSpecialTypeToHost @PSBoundParameters
     } else {
       # add space prefix based on indent level
@@ -271,11 +272,11 @@ function Write-XYZLogHeader {
     Write-Log ' '
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
     Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-Log $($FormatString -f "Script Name",$HostScriptName)
-    Write-Log $($FormatString -f "Log file",$LogFilePath)
-    Write-Log $($FormatString -f "Machine",$env:COMPUTERNAME)
-    Write-Log $($FormatString -f "User",($env:USERDOMAIN + "\" + $env:USERNAME))
-    Write-Log $($FormatString -f "Start time",$StartTime)
+    Write-Log $($FormatString -f "Script Name", $HostScriptName)
+    Write-Log $($FormatString -f "Log file", $LogFilePath)
+    Write-Log $($FormatString -f "Machine", $env:COMPUTERNAME)
+    Write-Log $($FormatString -f "User", ($env:USERDOMAIN + "\" + $env:USERNAME))
+    Write-Log $($FormatString -f "Start time", $StartTime)
 
     Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
     #endregion
@@ -303,11 +304,11 @@ function Write-XYZLogFooter {
   process {
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
     Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-Log $($FormatString -f "Script Name",$HostScriptName)
-    Write-Log $($FormatString -f "Log file",$LogFilePath)
+    Write-Log $($FormatString -f "Script Name", $HostScriptName)
+    Write-Log $($FormatString -f "Log file", $LogFilePath)
 
     $EndTime = Get-Date
-    Write-Log $($FormatString -f "End time",$EndTime)
+    Write-Log $($FormatString -f "End time", $EndTime)
     # determine duration and display
     $Duration = $EndTime - $StartTime
     [string]$DurationDisplay = ''
@@ -315,7 +316,7 @@ function Write-XYZLogFooter {
     if ($Duration.Hours -gt 0) { $DurationDisplay += $Duration.Hours.ToString() + " hours, " }
     if ($Duration.Minutes -gt 0) { $DurationDisplay += $Duration.Minutes.ToString() + " minutes, " }
     if ($Duration.Seconds -gt 0) { $DurationDisplay += $Duration.Seconds.ToString() + " seconds" }
-    Write-Log $($FormatString -f "Duration",$DurationDisplay)
+    Write-Log $($FormatString -f "Duration", $DurationDisplay)
     Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
     Write-Log ' '
   }
