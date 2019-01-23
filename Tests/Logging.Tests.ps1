@@ -10,7 +10,6 @@ Describe "Re/loading: $SourceScript" { }
 #endregion
 
 
-
 #region Test disable logging
 Describe 'test disable logging' {
   Context 'test disable logging when logging not originally enabled' {
@@ -31,7 +30,7 @@ Describe 'test disable logging' {
   Context 'test disable logging when logging enabled - direct' {
     BeforeAll { 
       Invoke-InitializeLogSettings
-      # because setting directly, this can be a file - or just anything not null
+      # because setting directly, this can be a file - or any value not null - but doesn't need to exist
       $TestLogFilePath = Join-Path -Path $TestDrive -ChildPath TestLogFile.txt
       $script:LogFilePath = $TestLogFilePath
       $TestIndentLevel = 5
@@ -69,19 +68,55 @@ Describe 'test disable logging' {
 #endregion
 
 
-
-
 #region Test get log file path
 Describe 'get log file path' {
-  It 'gets uninitialized log file path value of null' {
+  It 'gets uninitialized log file path value of null - direct' {
     $script:LogFilePath = $null
     Get-XYZLogFilePath | Should BeNullOrEmpty
   }
 
-  It 'gets initialized log file path' {
+  It 'gets uninitialized log file path value of null - API' {
+    Invoke-InitializeLogSettings
+    Get-XYZLogFilePath | Should BeNullOrEmpty
+  }
+
+  It 'gets initialized log file path - direct' {
     $TestLogFilePath = 'c:\Temp\LogFile.txt'
     $script:LogFilePath = $TestLogFilePath
     Get-XYZLogFilePath | Should Be $TestLogFilePath
+  }
+
+  Context 'gets initialized log file path - API' {
+    BeforeAll {
+      Invoke-InitializeLogSettings
+      # because using API, this must be an actual folder that exists
+      $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+      $null = New-Item -Path $TestLogFolderPath -ItemType Directory
+      Enable-XYZLogFile -LogFolderPath $TestLogFolderPath
+    }
+
+    It 'get log file path - not null' {
+      Get-XYZLogFilePath | Should Not BeNullOrEmpty
+    }
+
+    It 'get log file path - parent folder matches' {
+      Split-Path -Path (Get-XYZLogFilePath) -Parent | Should Be $TestLogFolderPath
+    }
+
+    It 'get log file path - file name matches pattern' {
+      # see definition of DefaultLogFileNameFormatString variable in Logging.ps1 for more info
+      $Regex = (Split-Path -Path $PSCommandPath -Leaf) + '_Log_\d{8}_\d{6}.txt'
+      Split-Path -Path (Get-XYZLogFilePath) -Leaf | Should Match $Regex
+    }
+
+    # could we test the number in the file datetime stamp is a valid datetime and that it is within a fraction of a
+    # second of when the Enable-XYZLogFile call was made? we could, but there's only so much time in the day...
+
+    It 'get log file path - file name matches exactly' {
+      # fetch directly
+      $TestLogFilePath = $script:LogFilePath
+      Get-XYZLogFilePath | Should Be $TestLogFilePath
+    }
   }
 }
 #endregion
