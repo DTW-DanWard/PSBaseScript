@@ -13,7 +13,7 @@ Describe "Re/loading: $SourceScript" { }
 #region Test disable logging
 Describe 'test disable logging' {
   Context 'test disable logging when logging not originally enabled' {
-    BeforeAll { 
+    BeforeAll {
       Invoke-InitializeLogSettings
       Disable-XYZLogFile
     }
@@ -28,7 +28,7 @@ Describe 'test disable logging' {
   }
 
   Context 'test disable logging when logging enabled - direct' {
-    BeforeAll { 
+    BeforeAll {
       Invoke-InitializeLogSettings
       # because setting directly, this can be a file - or any value not null - but doesn't need to exist
       $TestLogFilePath = Join-Path -Path $TestDrive -ChildPath TestLogFile.txt
@@ -48,7 +48,7 @@ Describe 'test disable logging' {
   }
 
   Context 'test disable logging when logging enabled - API' {
-    BeforeAll { 
+    BeforeAll {
       Invoke-InitializeLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
@@ -124,32 +124,64 @@ Describe 'get log file path' {
 
 #region Test add/remove indent level
 Describe 'add and remove indent level' {
-  It 'adds 1 and equals 1 with initial default value 0' {
+  It 'adds 1 and equals 1 with initial default value 0 - direct' {
     $TestIndentLevel = 0
     $script:IndentLevel = $TestIndentLevel
     Add-XYZLogIndentLevel
     $script:IndentLevel | Should Be ($TestIndentLevel + 1)
   }
 
-  It 'adds 1 and equals n+1 with initial value n (non-zero)' {
+  It 'adds 1 and equals 1 with initial default value 0 - API' {
+    Invoke-InitializeLogSettings
+    Add-XYZLogIndentLevel
+    $script:IndentLevel | Should Be 1
+  }
+
+  It 'adds 1 and equals n+1 with initial value n (non-zero) - direct' {
     $TestIndentLevel = 5
     $script:IndentLevel = $TestIndentLevel
     Add-XYZLogIndentLevel
     $script:IndentLevel | Should Be ($TestIndentLevel + 1)
   }
 
-  It 'removes 1 and equals n-1 with initial value n (greater than zero)' {
+  It 'adds 1 and equals n+1 with initial value n (non-zero) - API' {
+    $TestIndentLevel = 5
+    Invoke-InitializeLogSettings
+    # get indent level set to non-zero value
+    for ($i = 1; $i -le $TestIndentLevel; $i++) { Add-XYZLogIndentLevel }
+    # now run a single increment, should be 1 higher
+    Add-XYZLogIndentLevel
+    $script:IndentLevel | Should Be ($TestIndentLevel + 1)
+  }
+
+  It 'removes 1 and equals n-1 with initial value n (greater than zero) - direct' {
     $TestIndentLevel = 5
     $script:IndentLevel = $TestIndentLevel
     Remove-XYZLogIndentLevel
     $script:IndentLevel | Should Be ($TestIndentLevel - 1)
   }
 
-  It 'does not remove 1 with initial value of 0' {
+  It 'removes 1 and equals n-1 with initial value n (greater than zero) - API' {
+    $TestIndentLevel = 5
+    Invoke-InitializeLogSettings
+    # get indent level set to non-zero value
+    for ($i = 1; $i -le $TestIndentLevel; $i++) { Add-XYZLogIndentLevel }
+    # now run a single decrement, should be 1 lower
+    Remove-XYZLogIndentLevel
+    $script:IndentLevel | Should Be ($TestIndentLevel - 1)
+  }
+
+  It 'does not remove 1 with initial value of 0 - direct' {
     $TestIndentLevel = 0
     $script:IndentLevel = $TestIndentLevel
     Remove-XYZLogIndentLevel
     $script:IndentLevel | Should Be ($TestIndentLevel)
+  }
+
+  It 'does not remove 1 with initial value of 0 - API' {
+    Invoke-InitializeLogSettings
+    Remove-XYZLogIndentLevel
+    $script:IndentLevel | Should Be 0
   }
 }
 #endregion
