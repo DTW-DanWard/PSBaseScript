@@ -324,26 +324,57 @@ Describe 'test write log header & footer' {
       Disable-XYZLogFile
     }
 
-    It 'test Script name present in Header' {
+    It 'test Script name present in header' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Script name +' + (Split-Path -Path $PSCommandPath -Leaf))
     }
 
-    It 'test Log file present in Header' {
+    It 'test Log file present in header' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Log file +' + (Get-XYZLogFilePath))
     }
 
-    It 'test Machine present in Header' {
+    It 'test Machine present in header' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Machine +' + $env:COMPUTERNAME)
     }
 
-    It 'test User present in Header' {
+    It 'test User present in header' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('User +' + ($env:USERDOMAIN + "\\" + $env:USERNAME))
     }
 
-    It 'test Start time present in Header' {
+    It 'test Start time present in header' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Start time +' + ($script:StartTime.ToString()))
     }
   }
+
+  Context 'test write log footer, normal duration - API' {
+
+    BeforeAll {
+      Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
+      # need slight delay so Duration value exists
+      $SecondsDelay = 2
+      Start-Sleep -Seconds $SecondsDelay
+      Write-XYZLogFooter
+      Disable-XYZLogFile
+    }
+
+    It 'test Script name present in footer' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Script name +' + (Split-Path -Path $PSCommandPath -Leaf))
+    }
+
+    It 'test Log file present in footer' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Log file +' + (Get-XYZLogFilePath))
+    }
+
+    It 'test End time present in footer' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('End time +' + ($script:EndTime.ToString()))
+    }
+
+    It 'test Duration present in footer' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Duration +' + $SecondsDelay + ' seconds')
+    }
+
+
+  }
+
 }
 #endregion
 

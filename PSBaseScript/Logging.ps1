@@ -16,8 +16,9 @@ function Initialize-XYZLogSettings {
     [string]$script:DefaultLogFileNameFormatString = '{0}_Log_{1:yyyyMMdd_HHmmss}.txt'
     [bool]$script:SuppressHostOutput = $false
 
-    # time script started, needed for duration
+    # start/end time
     $script:StartTime = $null
+    $script:EndTime = $null
 
     # two spaces for an index
     [string]$script:IndentStep = '  '
@@ -280,7 +281,7 @@ function Write-XYZLogFooter {
     Write-XYZLog $($FormatString -f "Script name", $HostScriptName)
     Write-XYZLog $($FormatString -f "Log file", $LogFilePath)
 
-    $EndTime = Get-Date
+    $script:EndTime = Get-Date
     Write-XYZLog $($FormatString -f "End time", $EndTime)
     # determine duration and display
     $Duration = $EndTime - $StartTime
