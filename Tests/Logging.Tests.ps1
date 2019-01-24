@@ -230,7 +230,7 @@ Describe 'test write log' {
       Enable-XYZLogFile $TestLogFolderPath
       $LogFileContent = "sample text"
       # when writing logs without specifying NoHostOutput we'll capture/suppress the console output so it doesn't clutter the host
-      $null = Write-Log -Content $LogFileContent 6>&1
+      $null = Write-XYZLog -Content $LogFileContent 6>&1
       Disable-XYZLogFile
     }
 
@@ -251,7 +251,7 @@ Describe 'test write log' {
       Enable-XYZLogFile $TestLogFolderPath
       $LogFileContent = "sample text"
       # when writing logs without specifying NoHostOutput we'll capture/suppress the console output so it doesn't clutter the host
-      $null = $LogFileContent | Write-Log 6>&1
+      $null = $LogFileContent | Write-XYZLog 6>&1
       Disable-XYZLogFile
     }
 
@@ -272,7 +272,7 @@ Describe 'test write log' {
       Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
       $LogFileContent = "sample text"
       # because we specified NoHostOutput we'll capture the console output BUT there shouldn't be any
-      $ConsoleOutput = Write-Log -Content $LogFileContent 6>&1
+      $ConsoleOutput = Write-XYZLog -Content $LogFileContent 6>&1
       Disable-XYZLogFile
     }
 
@@ -296,8 +296,8 @@ Describe 'test write log' {
       # now set bad log folder path
       $script:LogFilePath = 'z:\bad\folder'
       $LogFileContent = "sample text"
-      # attempting to Write-Log should throw error
-      { Write-Log -Content $LogFileContent 6>&1 } | Should throw
+      # attempting to Write-XYZLog should throw error
+      { Write-XYZLog -Content $LogFileContent 6>&1 } | Should throw
       Disable-XYZLogFile
       # reset value back
       $script:LogFilePath = $Temp

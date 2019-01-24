@@ -130,7 +130,7 @@ function Get-XYZLogFilePath {
 #endregion
 
 
-#region Functions: Write-Log
+#region Functions: Write-XYZLog
 
 <#
 .SYNOPSIS
@@ -141,10 +141,10 @@ a single string displaying all keys & values (not 'System.Collections.Hashtable'
 .PARAMETER Content
 Content to write
 .EXAMPLE
-Write-Log 'hey now'
+Write-XYZLog 'hey now'
 Writes 'hey now' to console and logs to file, if enabled
 #>
-function Write-Log {
+function Write-XYZLog {
   #region Function parameters
   [CmdletBinding()]
   param(
@@ -225,9 +225,9 @@ function Remove-XYZLogIndentLevel {
 
 <#
 .SYNOPSIS
-Writes script header information to Write-Log
+Writes script header information to Write-XYZLog
 .DESCRIPTION
-Writes script header informatino to Write-Log including script
+Writes script header informatino to Write-XYZLog including script
 name and path, machine name, domain/user name and start time.
 Additionally displays any information pass in via hashtable parameter.
 Information is surrounded with 'bars' of # marks.
@@ -242,16 +242,16 @@ function Write-XYZLogHeader {
   #endregion
   process {
     #region Write header
-    Write-Log ' '
+    Write-XYZLog ' '
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
-    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-Log $($FormatString -f "Script Name", $HostScriptName)
-    Write-Log $($FormatString -f "Log file", $LogFilePath)
-    Write-Log $($FormatString -f "Machine", $env:COMPUTERNAME)
-    Write-Log $($FormatString -f "User", ($env:USERDOMAIN + "\" + $env:USERNAME))
-    Write-Log $($FormatString -f "Start time", $StartTime)
+    Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-XYZLog $($FormatString -f "Script Name", $HostScriptName)
+    Write-XYZLog $($FormatString -f "Log file", $LogFilePath)
+    Write-XYZLog $($FormatString -f "Machine", $env:COMPUTERNAME)
+    Write-XYZLog $($FormatString -f "User", ($env:USERDOMAIN + "\" + $env:USERNAME))
+    Write-XYZLog $($FormatString -f "Start time", $StartTime)
 
-    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
     #endregion
     #endregion
   }
@@ -260,9 +260,9 @@ function Write-XYZLogHeader {
 
 <#
 .SYNOPSIS
-Writes script footer information to Write-Log
+Writes script footer information to Write-XYZLog
 .DESCRIPTION
-Writes script footer informatino to Write-Log including script
+Writes script footer informatino to Write-XYZLog including script
 name and path and end time.
 Information is surrounded with 'bars' of # marks.
 .EXAMPLE
@@ -276,12 +276,12 @@ function Write-XYZLogFooter {
   #endregion
   process {
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
-    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-Log $($FormatString -f "Script Name", $HostScriptName)
-    Write-Log $($FormatString -f "Log file", $LogFilePath)
+    Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-XYZLog $($FormatString -f "Script Name", $HostScriptName)
+    Write-XYZLog $($FormatString -f "Log file", $LogFilePath)
 
     $EndTime = Get-Date
-    Write-Log $($FormatString -f "End time", $EndTime)
+    Write-XYZLog $($FormatString -f "End time", $EndTime)
     # determine duration and display
     $Duration = $EndTime - $StartTime
     [string]$DurationDisplay = ''
@@ -289,9 +289,9 @@ function Write-XYZLogFooter {
     if ($Duration.Hours -gt 0) { $DurationDisplay += $Duration.Hours.ToString() + " hours, " }
     if ($Duration.Minutes -gt 0) { $DurationDisplay += $Duration.Minutes.ToString() + " minutes, " }
     if ($Duration.Seconds -gt 0) { $DurationDisplay += $Duration.Seconds.ToString() + " seconds" }
-    Write-Log $($FormatString -f "Duration", $DurationDisplay)
-    Write-Log $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-Log ' '
+    Write-XYZLog $($FormatString -f "Duration", $DurationDisplay)
+    Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
+    Write-XYZLog ' '
   }
 }
 #endregion
