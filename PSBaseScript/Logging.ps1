@@ -148,40 +148,33 @@ function Write-Log {
   #region Function parameters
   [CmdletBinding()]
   param(
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true,
-      ValueFromPipelineByPropertyName = $false, Position = 1)]
-    $Object
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    $Content
   )
   #endregion
   process {
-    $ObjectToWrite = $null
-    if ($null -ne $_) { $ObjectToWrite = $_; }
-    elseif ($null -ne $Object) { $ObjectToWrite = $Object; }
+    # only process if logging properly enabled
+    if ($null -eq $LogFilePath) { return }
+
+    $ContentToWrite = $null
+    if ($null -ne $_) { $ContentToWrite = $_; }
+    elseif ($null -ne $Content) { $ContentToWrite = $Content; }
     # if nothing passed, return
     else { return }
 
     # add space prefix based on indent level
-    $ObjectToWrite = ($script:IndentStep * $script:IndentLevel) + $ObjectToWrite.ToString()
-    $PSBoundParameters.Object = $ObjectToWrite
-    # write to log file in enabled (log file path set to value)
-    if ($null -ne $LogFilePath -and $LogFilePath.Trim() -ne '') {
-      [hashtable]$Params = @{ InputObject = $ObjectToWrite; FilePath = $LogFilePath } + $OutFileSettings
-      $Err = $null
-      Out-File @Params -ErrorVariable Err
-      if ($? -eq $false) {
-        Write-Error -Message "$($MyInvocation.MyCommand.Name):: error occurred in Out-File with parameters: $(Convert-XYZFlattenHashtable $Params) :: $("$Err")"
-        return
-      }
-    }
-    #region Write to console window using actual Write-Host cmdlet - if not $SuppressHostOutput
-    # only write content to console if $SuppressHostOutput -eq $false
-    if ($script:SuppressHostOutput -eq $false) {
-      # get reference to the actual cmdlet Write-Host, not our function
-      $Cmd = Get-Command -Name 'Write-Host' -CommandType Cmdlet
-      & $Cmd @PSBoundParameters
-    }
-    #endregion
+    $ContentToWrite = ($script:IndentStep * $script:IndentLevel) + $ContentToWrite.ToString()
 
+    # write to console window - if not $SuppressHostOutput
+    if ($script:SuppressHostOutput -eq $false) { Write-Host $ContentToWrite }
+
+    # write to log file
+    [hashtable]$Params = @{ InputObject = $ContentToWrite; FilePath = $LogFilePath } + $OutFileSettings
+    $Err = $null
+    Out-File @Params -ErrorVariable Err
+    if ($? -eq $false) {
+      throw "$($MyInvocation.MyCommand.Name):: error occurred in Out-File with parameters: $(Convert-XYZFlattenHashtable $Params) :: $("$Err")"
+    }
   }
 }
 #endregion

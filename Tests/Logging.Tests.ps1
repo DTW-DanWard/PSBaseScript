@@ -113,7 +113,6 @@ Describe 'test enable logging' {
 #endregion
 
 
-
 #region Test disable logging
 Describe 'test disable logging' {
   Context 'test disable logging when logging not originally enabled' {
