@@ -213,8 +213,8 @@ Describe 'get log file path' {
 #endregion
 
 
-#region Test write log
-Describe 'test write log' {
+#region Test write log entries
+Describe 'test write log entries' {
 
   BeforeAll {
     Initialize-XYZLogSettings
@@ -305,6 +305,48 @@ Describe 'test write log' {
   }
 }
 #endregion
+
+
+#region Test write log header & footer
+Describe 'test write log header & footer' {
+
+  BeforeAll {
+    Initialize-XYZLogSettings
+    $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+    $null = New-Item -Path $TestLogFolderPath -ItemType Directory
+  }
+
+  Context 'test write log header - API' {
+
+    BeforeAll {
+      Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
+      Write-XYZLogHeader
+      Disable-XYZLogFile
+    }
+
+    It 'test Script name present in Header' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Script name +' + (Split-Path -Path $PSCommandPath -Leaf))
+    }
+
+    It 'test Log file present in Header' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Log file +' + (Get-XYZLogFilePath))
+    }
+
+    It 'test Machine present in Header' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Machine +' + $env:COMPUTERNAME)
+    }
+
+    It 'test User present in Header' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('User +' + ($env:USERDOMAIN + "\\" + $env:USERNAME))
+    }
+
+    It 'test Start time present in Header' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Start time +' + ($script:StartTime.ToString()))
+    }
+  }
+}
+#endregion
+
 
 
 #region Test add/remove indent level

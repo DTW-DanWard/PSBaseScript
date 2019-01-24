@@ -245,7 +245,7 @@ function Write-XYZLogHeader {
     Write-XYZLog ' '
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
     Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-XYZLog $($FormatString -f "Script Name", $HostScriptName)
+    Write-XYZLog $($FormatString -f "Script name", $HostScriptName)
     Write-XYZLog $($FormatString -f "Log file", $LogFilePath)
     Write-XYZLog $($FormatString -f "Machine", $env:COMPUTERNAME)
     Write-XYZLog $($FormatString -f "User", ($env:USERDOMAIN + "\" + $env:USERNAME))
@@ -277,7 +277,7 @@ function Write-XYZLogFooter {
   process {
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
     Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    Write-XYZLog $($FormatString -f "Script Name", $HostScriptName)
+    Write-XYZLog $($FormatString -f "Script name", $HostScriptName)
     Write-XYZLog $($FormatString -f "Log file", $LogFilePath)
 
     $EndTime = Get-Date
