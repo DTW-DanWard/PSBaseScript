@@ -213,6 +213,100 @@ Describe 'get log file path' {
 #endregion
 
 
+#region Test write log
+Describe 'test write log' {
+
+  BeforeAll {
+    Invoke-InitializeLogSettings
+    # because using API, this must be an actual folder that exists
+    $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+    $null = New-Item -Path $TestLogFolderPath -ItemType Directory
+  }
+
+  Context 'test single log file with one log - API' {
+
+    BeforeAll {
+      # this is the first log file to be created
+      Enable-XYZLogFile $TestLogFolderPath
+      $LogFileContent = "sample text"
+      # when writing logs without specifying NoHostOutput we'll capture/suppress the console output so it doesn't clutter the host
+      $null = Write-Log -Content $LogFileContent 6>&1
+      Disable-XYZLogFile
+    }
+
+    It 'test only 1 file exists' {
+      (Get-ChildItem -Path $TestLogFolderPath -Recurse | Measure-Object).Count | Should Be 1
+    }
+
+    It 'test log file has correct content' {
+      # only 1 file should exist
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch $LogFileContent
+    }
+  }
+
+  Context 'test single log file with one log, pipeline input - API' {
+
+    BeforeAll {
+      # this is the first log file to be created
+      Enable-XYZLogFile $TestLogFolderPath
+      $LogFileContent = "sample text"
+      # when writing logs without specifying NoHostOutput we'll capture/suppress the console output so it doesn't clutter the host
+      $null = $LogFileContent | Write-Log 6>&1
+      Disable-XYZLogFile
+    }
+
+    It 'test only 1 file exists' {
+      (Get-ChildItem -Path $TestLogFolderPath -Recurse | Measure-Object).Count | Should Be 1
+    }
+
+    It 'test log file has correct content' {
+      # only 1 file should exist
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch $LogFileContent
+    }
+  }
+
+  Context 'test single log file with one log, NoHostOutput - API' {
+
+    BeforeAll {
+      # this is the first log file to be created
+      Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
+      $LogFileContent = "sample text"
+      # because we specified NoHostOutput we'll capture the console output BUT there shouldn't be any
+      $ConsoleOutput = Write-Log -Content $LogFileContent 6>&1
+      Disable-XYZLogFile
+    }
+
+    It 'test no console output' {
+      # only 1 file should exist
+      $ConsoleOutput | Should BeNullOrEmpty
+    }
+  }
+
+  Context 'test error thrown by bad Out-File parameters - API/direct' {
+
+    It 'test bad log folder path' {
+      # in order to force this error, we have to hack a bit, in this case we'll override
+      # the $script:LogFilePath value to something bad after it's been set via Enable-XYZLogFile
+      # in order to bypass the validation in Enable; we'll set it back at the end of the test
+
+      # capture correct log folder path before tests
+      $Temp = $TestLogFolderPath
+      # enable with valid value
+      Enable-XYZLogFile $TestLogFolderPath
+      # now set bad log folder path
+      $script:LogFilePath = 'z:\bad\folder'
+      $LogFileContent = "sample text"
+      # attempting to Write-Log should throw error
+      { Write-Log -Content $LogFileContent 6>&1 } | Should throw
+      Disable-XYZLogFile
+      # reset value back
+      $script:LogFilePath = $Temp
+    }
+  }
+}
+#endregion
+
+
 #region Test add/remove indent level
 Describe 'add and remove indent level' {
   It 'adds 1 and equals 1 with initial default value 0 - direct' {

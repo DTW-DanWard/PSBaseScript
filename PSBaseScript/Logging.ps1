@@ -138,8 +138,8 @@ Writes content to file and host
 .DESCRIPTION
 Writes content to file and host.  Hashtables and ordered dictionaries will be flattened to
 a single string displaying all keys & values (not 'System.Collections.Hashtable')
-.PARAMETER Object
-Object to write
+.PARAMETER Content
+Content to write
 .EXAMPLE
 Write-Log 'hey now'
 Writes 'hey now' to console and logs to file, if enabled
@@ -170,11 +170,7 @@ function Write-Log {
 
     # write to log file
     [hashtable]$Params = @{ InputObject = $ContentToWrite; FilePath = $LogFilePath } + $OutFileSettings
-    $Err = $null
-    Out-File @Params -ErrorVariable Err
-    if ($? -eq $false) {
-      throw "$($MyInvocation.MyCommand.Name):: error occurred in Out-File with parameters: $(Convert-XYZFlattenHashtable $Params) :: $("$Err")"
-    }
+    Out-File @Params
   }
 }
 #endregion
