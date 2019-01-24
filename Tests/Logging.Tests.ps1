@@ -371,13 +371,35 @@ Describe 'test write log header & footer' {
     It 'test Duration present in footer' {
       (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ('Duration +' + $SecondsDelay + ' seconds')
     }
-
-
   }
 
+  Context 'test write log footer, long duration - direct' {
+
+    BeforeAll {
+      Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
+      # we want to test the logic that puts together the duration text in the footer; this text
+      # specifies durations as:  W days, X hours, Y minutes, Z seconds
+      # but of course we won't put in a delay that is days long so we'll override the start time
+
+      # would be better to have larger values below but if so there's a chance the start time
+      # subtractions will affect the next unit up (-10 minutes affects the hours, etc.)
+      $DaysDelay = 1
+      $HoursDelay = 1
+      $MinutesDelay = 1
+      $SecondsDelay = 1
+
+      $NewStartTime = $script:StartTime
+      $script:StartTime = $NewStartTime.AddDays(-$DaysDelay).AddHours(-$HoursDelay).AddMinutes(-$MinutesDelay).AddSeconds(-$SecondsDelay)
+      Write-XYZLogFooter
+      Disable-XYZLogFile
+    }
+
+    It 'test Duration present in footer' {
+      (Get-ChildItem -Path $TestLogFolderPath).FullName | Should FileContentMatch ("Duration + $DaysDelay days, $HoursDelay hours, $MinutesDelay minutes, $SecondsDelay seconds")
+    }
+  }
 }
 #endregion
-
 
 
 #region Test add/remove indent level
