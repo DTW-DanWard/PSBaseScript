@@ -136,19 +136,13 @@ function Get-XYZLogFilePath {
 .SYNOPSIS
 Writes content to file and host
 .DESCRIPTION
-Writes content to file and host.  Special object types (see help for
-Confirm-XYZLogSpecialType) will be output in a way that shows the content
-as opposed to the Type name.
+Writes content to file and host.  Hashtables and ordered dictionaries will be flattened to
+a single string displaying all keys & values (not 'System.Collections.Hashtable')
 .PARAMETER Object
 Object to write
 .EXAMPLE
 Write-Log 'hey now'
 Writes 'hey now' to console and logs to file, if enabled
-.EXAMPLE
-Write-Log @{ A=1; B=2 }
-Writes this to console (and log, if enabled)
-A    1
-B    2
 #>
 function Write-Log {
   #region Function parameters
@@ -166,34 +160,28 @@ function Write-Log {
     # if nothing passed, return
     else { return }
 
-    # asdf fix
-
-    if ($false) {
-      # (Confirm-XYZLogSpecialType $ObjectToWrite) {
-      # Write-XYZSpecialTypeToHost @PSBoundParameters
-    } else {
-      # add space prefix based on indent level
-      $ObjectToWrite = ($script:IndentStep * $script:IndentLevel) + $ObjectToWrite.ToString()
-      $PSBoundParameters.Object = $ObjectToWrite
-      # write to log file in enabled (log file path set to value)
-      if ($null -ne $LogFilePath -and $LogFilePath.Trim() -ne '') {
-        [hashtable]$Params = @{ InputObject = $ObjectToWrite; FilePath = $LogFilePath } + $OutFileSettings
-        $Err = $null
-        Out-File @Params -ErrorVariable Err
-        if ($? -eq $false) {
-          Write-Error -Message "$($MyInvocation.MyCommand.Name):: error occurred in Out-File with parameters: $(Convert-XYZFlattenHashtable $Params) :: $("$Err")"
-          return
-        }
+    # add space prefix based on indent level
+    $ObjectToWrite = ($script:IndentStep * $script:IndentLevel) + $ObjectToWrite.ToString()
+    $PSBoundParameters.Object = $ObjectToWrite
+    # write to log file in enabled (log file path set to value)
+    if ($null -ne $LogFilePath -and $LogFilePath.Trim() -ne '') {
+      [hashtable]$Params = @{ InputObject = $ObjectToWrite; FilePath = $LogFilePath } + $OutFileSettings
+      $Err = $null
+      Out-File @Params -ErrorVariable Err
+      if ($? -eq $false) {
+        Write-Error -Message "$($MyInvocation.MyCommand.Name):: error occurred in Out-File with parameters: $(Convert-XYZFlattenHashtable $Params) :: $("$Err")"
+        return
       }
-      #region Write to console window using actual Write-Host cmdlet - if not $SuppressHostOutput
-      # only write content to console if $SuppressHostOutput -eq $false
-      if ($script:SuppressHostOutput -eq $false) {
-        # get reference to the actual cmdlet Write-Host, not our function
-        $Cmd = Get-Command -Name 'Write-Host' -CommandType Cmdlet
-        & $Cmd @PSBoundParameters
-      }
-      #endregion
     }
+    #region Write to console window using actual Write-Host cmdlet - if not $SuppressHostOutput
+    # only write content to console if $SuppressHostOutput -eq $false
+    if ($script:SuppressHostOutput -eq $false) {
+      # get reference to the actual cmdlet Write-Host, not our function
+      $Cmd = Get-Command -Name 'Write-Host' -CommandType Cmdlet
+      & $Cmd @PSBoundParameters
+    }
+    #endregion
+
   }
 }
 #endregion

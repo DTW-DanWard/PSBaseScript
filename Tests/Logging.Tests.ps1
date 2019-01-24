@@ -86,6 +86,29 @@ Describe 'test enable logging' {
       $script:SuppressHostOutput | Should Be $true
     }
   }
+
+  Context 'test enable logging with bad log folder path value - API' {
+
+    It 'folder does not exist' {
+      Invoke-InitializeLogSettings
+      $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+      # don't create this folder!
+      { Enable-XYZLogFile -LogFolderPath $TestLogFolderPath } | Should throw
+    }
+
+    It 'drive does not exist' {
+      Invoke-InitializeLogSettings
+      { Enable-XYZLogFile -LogFolderPath 'z:\bad\folder' } | Should throw
+    }
+
+    It 'path is real file, not a folder' {
+      Invoke-InitializeLogSettings
+      # create file with some text
+      $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestFile.txt
+      "some text" > $TestLogFolderPath
+      { Enable-XYZLogFile -LogFolderPath $TestLogFolderPath } | Should throw
+    }
+  }
 }
 #endregion
 
