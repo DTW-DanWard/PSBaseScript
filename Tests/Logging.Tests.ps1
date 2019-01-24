@@ -115,7 +115,9 @@ Describe 'test enable logging' {
 
 #region Test disable logging
 Describe 'test disable logging' {
+
   Context 'test disable logging when logging not originally enabled' {
+
     BeforeAll {
       Initialize-XYZLogSettings
       Disable-XYZLogFile
@@ -173,6 +175,7 @@ Describe 'test disable logging' {
 
 #region Test get log file path
 Describe 'get log file path' {
+
   It 'gets uninitialized log file path value of null - direct' {
     $script:LogFilePath = $null
     Get-XYZLogFilePath | Should BeNullOrEmpty
@@ -404,6 +407,7 @@ Describe 'test write log header & footer' {
 
 #region Test add/remove indent level
 Describe 'add and remove indent level' {
+
   It 'adds 1 and equals 1 with initial default value 0 - direct' {
     $TestIndentLevel = 0
     $script:IndentLevel = $TestIndentLevel
@@ -462,6 +466,31 @@ Describe 'add and remove indent level' {
     Initialize-XYZLogSettings
     Remove-XYZLogIndentLevel
     $script:IndentLevel | Should Be 0
+  }
+}
+#endregion
+
+
+#region Test flatten hash table utility
+Describe 'flatten hashtable' {
+
+  # note the spacing differences and key sorting between the hashtable definition and the output
+  It 'flattens simple hashtable - parameter' {
+    Convert-XYZFlattenHashtable -HT @{A=1; B=2} | Should Be '@{ A = 1 ; B = 2 }'
+  }
+
+  It 'flattens simple hashtable - pipeline' {
+    @{A=1; B=2} | Convert-XYZFlattenHashtable | Should Be '@{ A = 1 ; B = 2 }'
+  }
+
+  It 'flattens nested hashtable' {
+    # C and D should be sorted alphabetically
+    Convert-XYZFlattenHashtable -HT @{A=1;B=@{D=4;C=3}} | Should Be '@{ A = 1 ; B = @{ C = 3 ; D = 4 } }'
+  }
+
+  It 'flattens ordered dictionary, keeping initial key order' {
+    # C and D should be sorted alphabetically
+    Convert-XYZFlattenHashtable -HT ([ordered]@{C=1;B=2;D=3;A=4}) | Should Be '@{ C = 1 ; B = 2 ; D = 3 ; A = 4 }'
   }
 }
 #endregion

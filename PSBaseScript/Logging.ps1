@@ -251,7 +251,7 @@ function Write-XYZLogHeader {
   param()
   #endregion
   process {
-    #region Write header
+
     Write-XYZLog ' '
     [string]$FormatString = "{0,-$HeaderFooterCol1Width}{1}"
     Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
@@ -260,10 +260,7 @@ function Write-XYZLogHeader {
     Write-XYZLog $($FormatString -f "Machine", $env:COMPUTERNAME)
     Write-XYZLog $($FormatString -f "User", ($env:USERDOMAIN + "\" + $env:USERNAME))
     Write-XYZLog $($FormatString -f "Start time", $StartTime)
-
     Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
-    #endregion
-    #endregion
   }
 }
 
@@ -302,6 +299,59 @@ function Write-XYZLogFooter {
     Write-XYZLog $($FormatString -f "Duration", $DurationDisplay)
     Write-XYZLog $($HeaderFooterBarChar * $HeaderFooterBarLength)
     Write-XYZLog ' '
+  }
+}
+#endregion
+
+
+#region Functions: Convert-XYZFlattenHashtable
+
+<#
+.SYNOPSIS
+Flattens hashtable to string for printing (logging) purposes
+.DESCRIPTION
+Flattens hashtable to string for printing (logging) purposes.  Returned string looks
+exactly like a basic hashtable (you should be able to cut & paste and use it) but the
+primary purpose of this is to flatten the object so it can be logged properly instead
+of getting this: System.Collections.Hashtable.
+.PARAMETER HT
+Hashtable to flatten
+.EXAMPLE
+Convert-XYZFlattenHashtable -HT @{ A = 1; B = @{ C = 3; D = 4 } }
+@{ A = 1 ; B = @{ C = 3 ; D = 4 } }
+# note: the parameter being passed in is an object, a hash table; the returned value is
+# a string representing it
+#>
+function Convert-XYZFlattenHashtable {
+  #region Function parameters
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true,ValueFromPipeline = $true)]
+    $HT
+  )
+  #endregion
+  process {
+    $InitialValue = '@{ '
+    [string]$Result = $InitialValue
+    # if object is OrderedDictionary (created with [ordered] we don't sort Keys
+    # create by default assuming it is hashtable (needs sort)
+    [object[]]$TheKeys = $HT.Keys | Sort-Object
+    if ($HT -is [System.Collections.Specialized.OrderedDictionary]) {
+      $TheKeys = $HT.Keys
+    }
+    # go through each key
+    $TheKeys | ForEach-Object {
+      # separate keys/values pairs with semi-colon
+      if ($Result -ne $InitialValue) { $Result += " ; " }
+      # $_ is the key
+      # if the value itself is a (nested) hashtable or ordered dictionary, call again recursively
+      if ($HT.$_ -is [hashtable] -or $HT.$_ -is [System.Collections.Specialized.OrderedDictionary]) {
+        $Result += $_ + " = " + (Convert-XYZFlattenHashtable ($HT.$_))
+      } else {
+        $Result += $_ + " = " + $HT.$_
+      }
+    }
+    $Result + " }"
   }
 }
 #endregion
