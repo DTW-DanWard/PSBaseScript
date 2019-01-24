@@ -12,9 +12,11 @@ Describe "Re/loading: $SourceScript" { }
 
 #region Test enable logging
 Describe 'test enable logging' {
-  Context 'test enable logging when logging enabled (quiet = false) - API' {
+
+  Context 'test enable logging; SuppressHostOutput = false - API' {
+
     BeforeAll {
-      [DateTime]$TimeBeforeTest = Get-Date
+      [DateTime]$script:TimeBeforeTest = Get-Date
       Invoke-InitializeLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
@@ -58,13 +60,30 @@ Describe 'test enable logging' {
 
     It 'log file name - date time stamp in file name matches StartTime' {
       # see definition of DefaultLogFileNameFormatString variable in Logging.ps1 for more info
-      $Match = (Get-XYZLogFilePath) -match '.*_Log_(?<Year>\d{4})(?<Month>\d{2})(?<Day>\d{2})_(?<Hour>\d{2})(?<Minute>\d{2})(?<Second>\d{2}).txt$'
+      $null = (Get-XYZLogFilePath) -match '.*_Log_(?<Year>\d{4})(?<Month>\d{2})(?<Day>\d{2})_(?<Hour>\d{2})(?<Minute>\d{2})(?<Second>\d{2}).txt$'
       $DateInFileName = Get-Date -Year $Matches.Year -Month $Matches.Month -Day $Matches.Day -Hour $Matches.Hour -Minute $Matches.Minute -Second $Matches.Second
-      $script:StartTime | Should Be $script:StartTime
+      # comparing as strings (which has date + hour:minue:seconds) so no issues with milliseconds not matching
+      $DateInFileName.ToString() | Should Be $script:StartTime.ToString()
     }
 
-    It 'OutSilent is false' {
-      $script:OutSilent | Should Be $false
+    It 'SuppressHostOutput is false' {
+      $script:SuppressHostOutput | Should Be $false
+    }
+  }
+
+  Context 'test enable logging; SuppressHostOutput = true - API' {
+    BeforeAll {
+      Invoke-InitializeLogSettings
+      # because using API, this must be an actual folder that exists
+      $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
+      $null = New-Item -Path $TestLogFolderPath -ItemType Directory
+      Enable-XYZLogFile -LogFolderPath $TestLogFolderPath -NoHostOutput
+    }
+
+    # not repeating all other tests from SuppressHostOutput = false above, code path is exact same
+
+    It 'SuppressHostOutput is true' {
+      $script:SuppressHostOutput | Should Be $true
     }
   }
 }

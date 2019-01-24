@@ -103,7 +103,8 @@ Task Analyze Init, {
 
   # run script analyzer on all files EXCEPT build files in project root
   Get-ChildItem -Path $ProjectRoot -Recurse | Where-Object { @('.ps1', '.psm1') -contains $_.Extension -and $_.DirectoryName -ne $ProjectRoot } | ForEach-Object {
-    $Results = Invoke-ScriptAnalyzer -Path $_.FullName
+    # don't worry: Write-Host is *barely* used
+    $Results = Invoke-ScriptAnalyzer -Path $_.FullName -ExcludeRule PSAvoidUsingWriteHost
     if ($null -ne $Results) {
       Write-Build Red "PSScriptAnalyzer found issues in: $($_.Name)"
       $Results | ForEach-Object {

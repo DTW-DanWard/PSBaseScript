@@ -14,7 +14,7 @@ function Invoke-InitializeLogSettings {
     $script:LogFilePath = $null
     [hashtable]$script:OutFileSettings = @{ Encoding = 'utf8'; Force = $true; Append = $true }
     [string]$script:DefaultLogFileNameFormatString = '{0}_Log_{1:yyyyMMdd_HHmmss}.txt'
-    [bool]$script:OutSilent = $false
+    [bool]$script:SuppressHostOutput = $false
 
     # time script started, needed for duration
     $script:StartTime = $null
@@ -71,7 +71,7 @@ the file suffix.
 Folder MUST exist!
 .PARAMETER LogFolderPath
 Path of log folder for storing log files - folder MUST exist!
-.PARAMETER Silent
+.PARAMETER NoHostOutput
 Do not write information to console, just to log file.
 .EXAMPLE
 Enable-XYZLogFile c:\Temp\Logs
@@ -83,7 +83,7 @@ function Enable-XYZLogFile {
     [Parameter(Mandatory = $true)]
     [ValidateScript( {Test-Path -Path $_ -PathType Container})]
     $LogFolderPath,
-    [switch]$Silent
+    [switch]$NoHostOutput
   )
   #endregion
   process {
@@ -99,8 +99,8 @@ function Enable-XYZLogFile {
     $LogFileName = $script:DefaultLogFileNameFormatString -f $script:HostScriptName, $script:StartTime
     $script:LogFilePath = Join-Path -Path $LogFolderPath -ChildPath $LogFileName
 
-    #region Set OutSilent
-    $script:OutSilent = $Silent
+    #region Set SuppressHostOutput
+    $script:SuppressHostOutput = $NoHostOutput
     #endregion
   }
 }
@@ -141,8 +141,6 @@ Confirm-XYZLogSpecialType) will be output in a way that shows the content
 as opposed to the Type name.
 .PARAMETER Object
 Object to write
-.PARAMETER NoNewline
-Don't write a new line after writing
 .EXAMPLE
 Write-Log 'hey now'
 Writes 'hey now' to console and logs to file, if enabled
@@ -156,11 +154,9 @@ function Write-Log {
   #region Function parameters
   [CmdletBinding()]
   param(
-    [Parameter(Mandatory = $false, ValueFromPipeline = $true,
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true,
       ValueFromPipelineByPropertyName = $false, Position = 1)]
-    $Object,
-    [Parameter(Mandatory = $false, ValueFromPipeline = $false)]
-    [switch]$NoNewline
+    $Object
   )
   #endregion
   process {
@@ -189,9 +185,9 @@ function Write-Log {
           return
         }
       }
-      #region Write to console window using actual Write-Host cmdlet - if not $OutSilent
-      # only write content to console if $OutSilent -eq $false
-      if ($script:OutSilent -eq $false) {
+      #region Write to console window using actual Write-Host cmdlet - if not $SuppressHostOutput
+      # only write content to console if $SuppressHostOutput -eq $false
+      if ($script:SuppressHostOutput -eq $false) {
         # get reference to the actual cmdlet Write-Host, not our function
         $Cmd = Get-Command -Name 'Write-Host' -CommandType Cmdlet
         & $Cmd @PSBoundParameters
