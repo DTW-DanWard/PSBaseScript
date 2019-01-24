@@ -17,7 +17,7 @@ Describe 'test enable logging' {
 
     BeforeAll {
       [DateTime]$script:TimeBeforeTest = Get-Date
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
       $null = New-Item -Path $TestLogFolderPath -ItemType Directory
@@ -73,7 +73,7 @@ Describe 'test enable logging' {
 
   Context 'test enable logging; SuppressHostOutput = true - API' {
     BeforeAll {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
       $null = New-Item -Path $TestLogFolderPath -ItemType Directory
@@ -90,19 +90,19 @@ Describe 'test enable logging' {
   Context 'test enable logging with bad log folder path value - API' {
 
     It 'folder does not exist' {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
       # don't create this folder!
       { Enable-XYZLogFile -LogFolderPath $TestLogFolderPath } | Should throw
     }
 
     It 'drive does not exist' {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       { Enable-XYZLogFile -LogFolderPath 'z:\bad\folder' } | Should throw
     }
 
     It 'path is real file, not a folder' {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # create file with some text
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestFile.txt
       "some text" > $TestLogFolderPath
@@ -117,7 +117,7 @@ Describe 'test enable logging' {
 Describe 'test disable logging' {
   Context 'test disable logging when logging not originally enabled' {
     BeforeAll {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       Disable-XYZLogFile
     }
 
@@ -132,7 +132,7 @@ Describe 'test disable logging' {
 
   Context 'test disable logging when logging enabled - direct' {
     BeforeAll {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # because setting directly, this can be a file - or any value not null - but doesn't need to exist
       $TestLogFilePath = Join-Path -Path $TestDrive -ChildPath TestLogFile.txt
       $script:LogFilePath = $TestLogFilePath
@@ -152,7 +152,7 @@ Describe 'test disable logging' {
 
   Context 'test disable logging when logging enabled - API' {
     BeforeAll {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
       $null = New-Item -Path $TestLogFolderPath -ItemType Directory
@@ -179,7 +179,7 @@ Describe 'get log file path' {
   }
 
   It 'gets uninitialized log file path value of null - API' {
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     Get-XYZLogFilePath | Should BeNullOrEmpty
   }
 
@@ -191,7 +191,7 @@ Describe 'get log file path' {
 
   Context 'gets initialized log file path - API' {
     BeforeAll {
-      Invoke-InitializeLogSettings
+      Initialize-XYZLogSettings
       # because using API, this must be an actual folder that exists
       $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
       $null = New-Item -Path $TestLogFolderPath -ItemType Directory
@@ -217,7 +217,7 @@ Describe 'get log file path' {
 Describe 'test write log' {
 
   BeforeAll {
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     # because using API, this must be an actual folder that exists
     $TestLogFolderPath = Join-Path -Path $TestDrive -ChildPath TestLogFolder
     $null = New-Item -Path $TestLogFolderPath -ItemType Directory
@@ -272,7 +272,7 @@ Describe 'test write log' {
       Enable-XYZLogFile $TestLogFolderPath -NoHostOutput
       $LogFileContent = "sample text"
       # because we specified NoHostOutput we'll capture the console output BUT there shouldn't be any
-      $ConsoleOutput = Write-XYZLog -Content $LogFileContent 6>&1
+      $script:ConsoleOutput = Write-XYZLog -Content $LogFileContent 6>&1
       Disable-XYZLogFile
     }
 
@@ -317,7 +317,7 @@ Describe 'add and remove indent level' {
   }
 
   It 'adds 1 and equals 1 with initial default value 0 - API' {
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     Add-XYZLogIndentLevel
     $script:IndentLevel | Should Be 1
   }
@@ -331,7 +331,7 @@ Describe 'add and remove indent level' {
 
   It 'adds 1 and equals n+1 with initial value n (non-zero) - API' {
     $TestIndentLevel = 5
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     # get indent level set to non-zero value
     for ($i = 1; $i -le $TestIndentLevel; $i++) { Add-XYZLogIndentLevel }
     # now run a single increment, should be 1 higher
@@ -348,7 +348,7 @@ Describe 'add and remove indent level' {
 
   It 'removes 1 and equals n-1 with initial value n (greater than zero) - API' {
     $TestIndentLevel = 5
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     # get indent level set to non-zero value
     for ($i = 1; $i -le $TestIndentLevel; $i++) { Add-XYZLogIndentLevel }
     # now run a single decrement, should be 1 lower
@@ -364,7 +364,7 @@ Describe 'add and remove indent level' {
   }
 
   It 'does not remove 1 with initial value of 0 - API' {
-    Invoke-InitializeLogSettings
+    Initialize-XYZLogSettings
     Remove-XYZLogIndentLevel
     $script:IndentLevel | Should Be 0
   }

@@ -3,7 +3,7 @@
 # should be located in this script.  Put helper/output functions in Logging-Utils.psm1.
 
 #region Function:
-function Invoke-InitializeLogSettings {
+function Initialize-XYZLogSettings {
   [CmdletBinding()]
   param()
   process {
@@ -32,7 +32,7 @@ function Invoke-InitializeLogSettings {
 #endregion
 
 
-Invoke-InitializeLogSettings
+Initialize-XYZLogSettings
 
 
 #region Functions: Disable-XYZLogFile, Enable-XYZLogFile
