@@ -1,8 +1,17 @@
 
-# Core logging functionality; functions that use or modify any logging internal variables
-# should be located in this script.  Put helper/output functions in Logging-Utils.psm1.
+# Logging functionality
 
-#region Function:
+#region Function: Initialize-XYZLogSettings
+
+<#
+.SYNOPSIS
+Initializes log settings
+.DESCRIPTION
+Initializes script-level log settings to default/null values.
+.EXAMPLE
+Initialize-XYZLogSettings
+<resets log settings>
+#>
 function Initialize-XYZLogSettings {
   [CmdletBinding()]
   param()
