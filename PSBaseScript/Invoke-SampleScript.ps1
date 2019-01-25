@@ -10,7 +10,7 @@ Add-XYZLogIndentLevel
 
 Write-XYZLog "$(Get-XYZLogFilePath)"
 
-Start-Sleep -sec 5
+Start-Sleep -sec 1
 
 Add-XYZLogIndentLevel
 Write-XYZLog "Hey now!"
