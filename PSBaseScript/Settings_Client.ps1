@@ -14,6 +14,7 @@ Url, UserName
 function Get-XYZSettingsPropertiesPlaintext {
   #region Function parameters
   [CmdletBinding()]
+  [OutputType([System.Array])]
   param()
   #endregion
   process {
@@ -37,6 +38,7 @@ Password
 function Get-XYZSettingsPropertiesEncrypted {
   #region Function parameters
   [CmdletBinding()]
+  [OutputType([System.Array])]
   param()
   #endregion
   process {
