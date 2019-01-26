@@ -27,9 +27,9 @@ function Get-XYZSettingsPropertiesPlaintext {
 
 <#
 .SYNOPSIS
-Returns list of settings properties stored encrypted
+Returns list of settings properties that are stored encrypted
 .DESCRIPTION
-Returns list of settings properties stored encrypted.
+Returns list of settings properties that are stored encrypted.
 .EXAMPLE
 Get-XYZSettingsPropertiesEncrypted
 Password
@@ -40,7 +40,8 @@ function Get-XYZSettingsPropertiesEncrypted {
   param()
   #endregion
   process {
-    @('Url','UserName')
+    #ensure an array is return - preceed with ,
+    ,@('Password')
   }
 }
 #endregion

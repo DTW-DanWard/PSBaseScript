@@ -10,25 +10,15 @@ Describe "Re/loading: $SourceScript" { }
 #endregion
 
 
-#region Test default settings properties
-Describe 'settings properties' {
+#region Test default settings properties values
+Describe 'settings properties values' {
 
-  It 'flattens simple hashtable - parameter' {
-    Convert-XYZFlattenHashtable -HT @{A=1; B=2} | Should Be '@{ A = 1 ; B = 2 }'
+  It 'plaintext properties exist' {
+    Get-XYZSettingsPropertiesPlaintext | Should Not BeNullOrEmpty
   }
 
-  It 'flattens simple hashtable - pipeline' {
-    @{A=1; B=2} | Convert-XYZFlattenHashtable | Should Be '@{ A = 1 ; B = 2 }'
-  }
-
-  It 'flattens nested hashtable' {
-    # C and D should be sorted alphabetically
-    Convert-XYZFlattenHashtable -HT @{A=1;B=@{D=4;C=3}} | Should Be '@{ A = 1 ; B = @{ C = 3 ; D = 4 } }'
-  }
-
-  It 'flattens ordered dictionary, keeping initial key order' {
-    # C and D should be sorted alphabetically
-    Convert-XYZFlattenHashtable -HT ([ordered]@{C=1;B=2;D=3;A=4}) | Should Be '@{ C = 1 ; B = 2 ; D = 3 ; A = 4 }'
+  It 'encrypted properties might exist' {
+    (Get-XYZSettingsPropertiesEncrypted).Count | Should BeGreaterThan -1
   }
 }
 #endregion
