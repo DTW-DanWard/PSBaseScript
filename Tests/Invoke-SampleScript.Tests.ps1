@@ -1,4 +1,3 @@
-
 Set-StrictMode -Version Latest
 
 #region Get source file path - don't run

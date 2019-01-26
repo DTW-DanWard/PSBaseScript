@@ -1,4 +1,3 @@
-
 Set-StrictMode -Version Latest
 
 # make sure BuildHelpers is installed and loaded; it will be when this is called from
