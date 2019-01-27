@@ -25,7 +25,6 @@ function Get-XYZSettings {
   #endregion
   process {
     $JsonExtension = '.json'
-    $Settings = $null
 
     # need separte variable for $SettingsFilePath as validation on $Path parameter impacts create default path value
     $SettingsFilePath = $Path
@@ -34,40 +33,62 @@ function Get-XYZSettings {
     # default location (same folder as invoking script - not this one, which might be in a
     # library folder - and the file name is name of script with .json extension, not .ps1)
     if ($null -eq $SettingsFilePath) {
-      $SettingsFilePath = Join-Path -Path $MyInvocation.PSScriptRoot -ChildPath ((Get-Item -Path $MyInvocation.PSCommandPath).BaseName + $JsonExtension)
+      $SettingsFilePath = Get-XYZSettingsDefaultFilePath -CallingScriptPath $MyInvocation.PSCommandPath
     }
 
+    # if settings file doesn't exist, create default file and display message to user
     if ($false -eq (Test-Path -Path $SettingsFilePath)) {
+      # asdf update
       Write-Host "Create settings file, display user message, return null settings: $SettingsFilePath"
-      $Settings
-      return
+    } else {
+
+      # settings file exists, validate it
+      #region Validation rules:
+      # - path is a file not a folder;
+      # - file extension is .json;
+      # - file is not empty;
+      # - converting from json to object does not throw exception.
+      #endregion
+      if ($null -ne $SettingsFilePath) {
+        if ($false -eq (Test-Path -Path $SettingsFilePath -PathType Leaf)) { throw "Settings file Path is a folder, not a file: $SettingsFilePath" }
+        if (((Get-Item -Path $SettingsFilePath).Extension) -ne $JsonExtension) { throw "Settings file Path should have .json extension: $SettingsFilePath" }
+        $SettingsContent = Get-Content -Path $SettingsFilePath -Raw
+        if ($null -eq $SettingsContent -or ($SettingsContent.Trim()) -eq '') { throw "Settings file is empty: $SettingsFilePath" }
+        # if file does not contain valid json convert will throw error
+        ConvertFrom-Json -InputObject $SettingsContent
+      }
     }
-
-    #region If settings file already exists, validate it
-    #region Validation rules:
-    # - path is a file not a folder;
-    # - file extension is .json;
-    # - file is not empty;
-    # - converting from json to object does not throw exception.
-    #endregion
-    if ($null -ne $SettingsFilePath) {
-      if ($false -eq (Test-Path -Path $SettingsFilePath -PathType Leaf)) { throw "Settings file Path is a folder, not a file: $SettingsFilePath" }
-      if (((Get-Item -Path $SettingsFilePath).Extension) -ne $JsonExtension) { throw "Settings file Path should have .json extension: $SettingsFilePath" }
-      $SettingsContent = Get-Content -Path $SettingsFilePath -Raw
-      if ($null -eq $SettingsContent -or ($SettingsContent.Trim()) -eq '') { throw "Settings file is empty: $SettingsFilePath" }
-      # if file does not contain valid json convert will throw error
-      ConvertFrom-Json -InputObject $SettingsContent
-      return
-    }
-    #endregion
-
-
-
-    # at this point, either valid settings file passed or no file specified in parameter
-    # so if no file passed,
-
 
   }
 }
 #endregion
 
+
+#region Functions: Get-XYZSettingsDefaultFilePath
+
+<#
+.SYNOPSIS
+Returns default file path for settings file
+.DESCRIPTION
+Returns default file path for settings file.  Replaces $CallingScriptPath .ps1 extension
+with .json.  $CallingScriptPath should be passed $MyInvocation.PSCommandPath
+.PARAMETER CallingScriptPath
+Full path to calling script, i.e. $MyInvocation.PSCommandPath
+.EXAMPLE
+Get-XYZSettingsDefaultFilePath $MyInvocation.PSCommandPath
+C:\Code\GitHub\PSBaseScript\PSBaseScript\Invoke-SampleScript.json
+#>
+function Get-XYZSettingsDefaultFilePath {
+  #region Function parameters
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    [ValidateScript( {$_ -match '\.ps1$'} )]
+    [string]$CallingScriptPath
+  )
+  #endregion
+  process {
+    $CallingScriptPath -replace '\.ps1$','.json'
+  }
+}
+#endregion

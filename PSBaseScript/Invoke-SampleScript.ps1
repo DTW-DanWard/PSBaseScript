@@ -10,17 +10,13 @@ Write-XYZLogHeader
 
 Write-XYZLog "Start: $(Get-Date)"
 Add-XYZLogIndentLevel
-
 Write-XYZLog "$(Get-XYZLogFilePath)"
-
-Start-Sleep -sec 1
-
 Add-XYZLogIndentLevel
 Write-XYZLog "Hey now!"
 Remove-XYZLogIndentLevel
 Remove-XYZLogIndentLevel
-
 Write-XYZLog "All done."
+
 Write-XYZLogFooter
 Disable-XYZLogFile
 
