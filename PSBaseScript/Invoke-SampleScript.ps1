@@ -1,6 +1,9 @@
 Set-StrictMode -Version Latest
 
 . (Join-Path -Path $PSScriptRoot -ChildPath Logging.ps1)
+. (Join-Path -Path $PSScriptRoot -ChildPath Settings.ps1)
+
+Get-XYZSettings C:\code\GitHub\PSBaseScript\PSBaseScript\Invoke-SampleScript.json
 
 Enable-XYZLogFile C:\temp\Logs
 Write-XYZLogHeader

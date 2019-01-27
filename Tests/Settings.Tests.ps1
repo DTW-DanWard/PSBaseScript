@@ -10,8 +10,8 @@ Describe "Re/loading: $SourceScript" { }
 #endregion
 
 
-#region Test get settings - errors with SettingsFilePath
-Describe 'get settings - errors with SettingsFilePath' {
+#region Test get settings - specify Path parameter - invalid path value or bad file
+Describe 'get settings - specify Path parameter - invalid path value or bad file' {
 
   BeforeAll {
     $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
@@ -19,36 +19,55 @@ Describe 'get settings - errors with SettingsFilePath' {
   }
 
   It 'get settings - settings file path invalid' {
-    { Get-XYZSettings -SettingsFilePath 'z:\bad\folder' } | Should throw
+    { Get-XYZSettings -Path 'z:\bad\folder' } | Should throw
   }
 
   It 'get settings - settings file path is a folder' {
-    { Get-XYZSettings -SettingsFilePath $TestSettingsFolder } | Should throw
+    { Get-XYZSettings -Path $TestSettingsFolder } | Should throw
   }
 
   It 'get settings - settings file does not exist' {
-    { Get-XYZSettings -SettingsFilePath (Join-Path -Path $TestSettingsFolder -ChildPath FileNotFound.json) } | Should throw
+    { Get-XYZSettings -Path (Join-Path -Path $TestSettingsFolder -ChildPath FileNotFound.json) } | Should throw
   }
 
   It 'get settings - settings file does not have json extension' {
     # create settings file
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath SettingsFile.txt
     "junk text - not important for this test" > $TestSettingsFile
-    { Get-XYZSettings -SettingsFilePath $TestSettingsFile } | Should throw
+    { Get-XYZSettings -Path $TestSettingsFile } | Should throw
   }
 
   It 'get settings - settings file is empty' {
-    # create settings file
+    # create empty settings file
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath SettingsFile.json
     " " > $TestSettingsFile
-    { Get-XYZSettings -SettingsFilePath $TestSettingsFile } | Should throw
+    { Get-XYZSettings -Path $TestSettingsFile } | Should throw
   }
 
   It 'get settings - settings file does not contain json' {
     # create settings file
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath SettingsFile.json
     "this is not json" > $TestSettingsFile
-    { Get-XYZSettings -SettingsFilePath $TestSettingsFile } | Should throw
+    { Get-XYZSettings -Path $TestSettingsFile } | Should throw
   }
 }
 #endregion
+
+
+
+
+# when testing preexisting file, need to make sure using THIS file name
+
+
+#region Test get settings - file in default location - valid
+Describe 'get settings - file in default location - valid' {
+
+  It 'get settings - file in default location - valid' {
+    Get-XYZSettings | Should BeOfType [PSCustomObject]
+  }
+}
+#endregion
+
+
+# asdf not done!
+# need tests pa
