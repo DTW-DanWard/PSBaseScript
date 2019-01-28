@@ -24,6 +24,7 @@ Describe 'get settings default file path' {
 }
 #endregion
 
+
 #region Test get settings - specify Path parameter - invalid path value or bad file
 Describe 'get settings - specify Path parameter - invalid path value or bad file' {
 
@@ -76,11 +77,10 @@ Describe 'get settings - do NOT specify Path parameter - invalid path value or b
     $null = New-Item -ItemType Directory -Path $TestSettingsFolder
   }
 
-  # # asdf - reenable this once create default file attempts to run
-  # It 'get settings - settings file path invalid' {
-  #   Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { 'z:\bad\folder' }
-  #   { Get-XYZSettings } | Should throw
-  # }
+  It 'get settings - settings file path invalid' {
+    Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { 'z:\bad\folder' }
+    { Get-XYZSettings } | Should throw
+  }
 
   It 'get settings - settings file path is a folder' {
     Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFolder }
@@ -117,45 +117,78 @@ Describe 'get settings - do NOT specify Path parameter - invalid path value or b
 #endregion
 
 
+#region Test get settings - no file exists in default location - create
+Describe 'get settings - no file exists in default location - create' {
 
+  # use separate contexts for testing settings file creation to ensure files cleaned up
+  # after each test
 
+  BeforeAll {
+    $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
+    $null = New-Item -ItemType Directory -Path $TestSettingsFolder
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$','.json'
+    $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
+    Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
+  }
 
+  AfterEach {
+    # settings file does not exist before any tests; it is created within each test so
+    # delete AFTER EACH test to ensure tests OK, (or could do this with separate Contexts so
+    # Pester cleans TestDrive: automatically, but that leads to a lot of duplication of setup code)
+    if (Test-Path -Path $TestSettingsFile) { Remove-Item -Path $TestSettingsFile -Force }
+  }
 
+  It 'file does not exist before' {
+    Test-Path -Path $TestSettingsFile | Should Be $false
+  }
 
+  It 'file gets created after' {
+    $null = Get-XYZSettings 6>&1
+    Test-Path -Path $TestSettingsFile | Should Be $true
+  }
 
-# #region Test get settings - do not specify Path parameter - invalid path value or bad file
-# Describe 'get settings - do not specify Path parameter - invalid path value or bad file' {
+  It 'content about new file is output to host' {
+    [object[]]$Output = Get-XYZSettings 6>&1
+    $Output.Count | Should Be 3
+  }
 
-#   BeforeAll {
-#     $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
-#     $null = New-Item -ItemType Directory -Path $TestSettingsFolder
-#   }
-
-#   It 'get settings - settings file path invalid' {
-#     { Get-XYZSettings -Path 'z:\bad\folder' } | Should throw
-#   }
-# }
-# #endregion
-
-
-
-# when testing preexisting file, need to make sure using THIS file name
-
-
-# asdf FIX THIS ONCE CAN MOCK!
-# throw "Settings file Path is a folder, not a file: $SettingsFilePath"
-# test case: there is a folder with name of setting file (including json file) in that preexisting location
-
-
-#region Test get settings - file in default location - valid
-Describe 'get settings - file in default location - valid' {
-
-  It 'get settings - file in default location - valid' {
-    Get-XYZSettings | Should BeOfType [PSCustomObject]
+  It 'content includes path to settings file' {
+    [object[]]$Output = Get-XYZSettings 6>&1
+    $Output[1] | Should Be $TestSettingsFile
   }
 }
 #endregion
 
 
-# asdf not done!
-# need tests pa
+#region Test get settings - file exists in default location - valid
+Describe 'get settings - file exists in default location - valid' {
+
+  BeforeAll {
+    $TestValue = 'TESTTEST'
+    $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
+    $null = New-Item -ItemType Directory -Path $TestSettingsFolder
+    $Settings = [PSCustomObject]@{
+      Prop1 = $TestValue
+      Prop2 = $TestValue
+    }
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$','.json'
+    $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
+    $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $TestSettingsFile
+    Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
+  }
+
+  It 'returns settings object' {
+    Get-XYZSettings | Should BeOfType [PSCustomObject]
+  }
+
+  It 'settings object property has test value' {
+    (Get-XYZSettings).Prop1 | Should Be $TestValue
+  }
+
+  It 'get settings object does not produce Write-Host output because file exists' {
+    # if file didn't exist would produce multiple lines of content and first test for
+    # PSCustomObject would fail as object produced would be an array
+    ([object[]](Get-XYZSettings 6>&1)).Count | Should Be 1
+  }
+}
+#endregion

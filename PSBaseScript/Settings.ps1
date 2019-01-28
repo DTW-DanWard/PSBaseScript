@@ -1,5 +1,9 @@
 Set-StrictMode -Version Latest
 
+. (Join-Path -Path $PSScriptRoot -ChildPath Settings_Client.ps1)
+
+Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
+
 #region Functions: Get-XYZSettings
 
 <#
@@ -38,8 +42,14 @@ function Get-XYZSettings {
 
     # if settings file doesn't exist, create default file and display message to user
     if ($false -eq (Test-Path -Path $SettingsFilePath)) {
-      # asdf update
-      Write-Host "Create settings file, display user message, return null settings: $SettingsFilePath"
+      $Settings = New-XYZSettingsObject
+
+      # asdf move to separate save function
+      $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $SettingsFilePath
+
+      Write-Host 'New settings file written to: ' -NoNewline
+      Write-Host $SettingsFilePath -ForegroundColor Cyan
+      Write-Host 'Edit this file, replacing every DEFAULT value with correct one.'
     } else {
 
       # settings file exists, validate it
@@ -89,6 +99,43 @@ function Get-XYZSettingsDefaultFilePath {
   #endregion
   process {
     $CallingScriptPath -replace '\.ps1$','.json'
+  }
+}
+#endregion
+
+
+#region Functions: New-XYZSettingsObject
+
+<#
+.SYNOPSIS
+Returns settings object with default value for each property value
+.DESCRIPTION
+Returns settings object with DEFAULT value for each property value.  Properties are created
+for every item appearing in Get-XYZSettingsPropertiesPlaintext and Get-XYZSettingsPropertiesEncrypted.
+Encrypted property names are also listed in a property named _EncryptedProperties.
+Encrypted property values are NOT encrypted at this time; they are only encrypted when stored in
+the file.
+.EXAMPLE
+New-XYZSettingsObject
+<returns PSObject with properties>
+#>
+function New-XYZSettingsObject {
+  #region Function parameters
+  [CmdletBinding(supportsshouldprocess)]
+  param()
+  #endregion
+  process {
+    if ($PSCmdlet.ShouldProcess("This should process")) {
+      $Settings = [ordered]@{}
+      # create property for each property name with value of DEFAULT
+      (Get-XYZSettingsPropertiesPlaintext) + (Get-XYZSettingsPropertiesEncrypted) | ForEach-Object {
+        $Settings.$_ = $Default
+      }
+      # also add list of encrypted property names
+      $Settings._EncryptedProperties = Get-XYZSettingsPropertiesEncrypted
+      # convert hashtable to PSObject and return
+      [PSCustomObject]$Settings
+    }
   }
 }
 #endregion
