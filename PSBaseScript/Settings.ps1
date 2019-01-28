@@ -42,17 +42,13 @@ function Get-XYZSettings {
 
     # if settings file doesn't exist, create default file and display message to user
     if ($false -eq (Test-Path -Path $SettingsFilePath)) {
-      $Settings = New-XYZSettingsObject
-
-      # asdf move to separate save function
-      $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $SettingsFilePath
+      New-XYZSettingsObject | ConvertTo-Json -Depth 100 | Out-File -FilePath $SettingsFilePath
 
       Write-Host 'New settings file written to: ' -NoNewline
       Write-Host $SettingsFilePath -ForegroundColor Cyan
       Write-Host 'Edit this file, replacing every DEFAULT value with correct one.'
     } else {
-
-      # settings file exists, validate it
+      # Settings file exists, validate it
       #region Validation rules:
       # - path is a file not a folder;
       # - file extension is .json;

@@ -117,11 +117,8 @@ Describe 'get settings - do NOT specify Path parameter - invalid path value or b
 #endregion
 
 
-#region Test get settings - no file exists in default location - create
-Describe 'get settings - no file exists in default location - create' {
-
-  # use separate contexts for testing settings file creation to ensure files cleaned up
-  # after each test
+#region Test get settings - no file exists in default location - create correctly
+Describe 'get settings - no file exists in default location - create correctly' {
 
   BeforeAll {
     $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
@@ -152,7 +149,7 @@ Describe 'get settings - no file exists in default location - create' {
     $Output.Count | Should Be 3
   }
 
-  It 'content includes path to settings file' {
+  It 'output content includes path to settings file' {
     [object[]]$Output = Get-XYZSettings 6>&1
     $Output[1] | Should Be $TestSettingsFile
   }
@@ -187,7 +184,7 @@ Describe 'get settings - file exists in default location - valid' {
 
   It 'get settings object does not produce Write-Host output because file exists' {
     # if file didn't exist would produce multiple lines of content and first test for
-    # PSCustomObject would fail as object produced would be an array
+    # PSCustomObject would fail as object produced would be an array with 3 items
     ([object[]](Get-XYZSettings 6>&1)).Count | Should Be 1
   }
 }

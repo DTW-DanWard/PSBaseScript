@@ -10,6 +10,7 @@ Write-XYZLogHeader
 $Settings = Get-XYZSettings
 if ($null -eq $Settings) {
   Write-XYZLog "No settings, exiting."
+  return
 } else {
   Write-XYZLog "Start: $(Get-Date)"
   Add-XYZLogIndentLevel
