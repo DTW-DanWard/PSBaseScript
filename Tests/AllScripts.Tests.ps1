@@ -10,6 +10,17 @@ Get-ChildItem -Path $env:BHModulePath -Filter *.ps1 -Recurse | ForEach-Object {
 }
 
 
+#region Ensure each source file name is unique across all source folders/files
+# unit testing .Test file to source mapping (Get-SourceScriptFilePath) assumes source file
+# name (without path) is unique across all source files; ensure that is the case
+Describe 'ensure source file names are unique' {
+
+  It 'ensure source file names are unique' {
+    $SourceScripts | ForEach-Object { Split-Path -Path $_ -Leaf } | Group-Object | Where-Object { $_.Count -gt 1 } | Select-Object Name | Should BeNullOrEmpty
+  }
+}
+
+
 #region Confirming all Source functions in the module have help defined
 $SourceScripts | Where-Object { ($null -ne (Get-Content $_)) -and ((Get-Content $_).Trim() -ne '') } | ForEach-Object {
   $SourceScript = $_

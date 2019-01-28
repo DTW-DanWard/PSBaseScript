@@ -40,7 +40,7 @@ function Get-SourceScriptFilePath {
   if ($null -eq $SourceFile -or $SourceFile.Count -eq 0) {
     throw "No corresponding source file $SourceScriptName found found for $TestScriptName"
   } elseif ($SourceFile.Count -gt 1) {
-    throw -Message "Multiple source files named $SourceScriptName found found for $TestScriptName"
+    throw "Multiple source files named $SourceScriptName found found for $TestScriptName"
   }
   # return the full path
   $SourceFile[0].FullName

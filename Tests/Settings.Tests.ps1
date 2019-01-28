@@ -11,7 +11,6 @@ Describe "Re/loading: $SourceScript" { }
 
 
 
-
 #region Test get settings default file path
 Describe 'get settings default file path' {
 
@@ -23,6 +22,7 @@ Describe 'get settings default file path' {
     Get-XYZSettingsDefaultFilePath -CallingScriptPath (Join-Path -Path $TestDrive -ChildPath File.ps1) | Should BeOfType [string]
   }
 }
+#endregion
 
 #region Test get settings - specify Path parameter - invalid path value or bad file
 Describe 'get settings - specify Path parameter - invalid path value or bad file' {
