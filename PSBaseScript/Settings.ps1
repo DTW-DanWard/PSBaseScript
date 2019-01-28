@@ -43,28 +43,27 @@ function Get-XYZSettings {
     # if settings file doesn't exist, create default file and display message to user
     if ($false -eq (Test-Path -Path $SettingsFilePath)) {
       New-XYZSettingsObject | ConvertTo-Json -Depth 100 | Out-File -FilePath $SettingsFilePath
-
       Write-Host 'New settings file written to: ' -NoNewline
       Write-Host $SettingsFilePath -ForegroundColor Cyan
       Write-Host 'Edit this file, replacing every DEFAULT value with correct one.'
     } else {
-      # Settings file exists, validate it
-      #region Validation rules:
-      # - path is a file not a folder;
-      # - file extension is .json;
-      # - file is not empty;
-      # - converting from json to object does not throw exception.
-      #endregion
-      if ($null -ne $SettingsFilePath) {
-        if ($false -eq (Test-Path -Path $SettingsFilePath -PathType Leaf)) { throw "Settings file Path is a folder, not a file: $SettingsFilePath" }
-        if (((Get-Item -Path $SettingsFilePath).Extension) -ne $JsonExtension) { throw "Settings file Path should have .json extension: $SettingsFilePath" }
-        $SettingsContent = Get-Content -Path $SettingsFilePath -Raw
-        if ($null -eq $SettingsContent -or ($SettingsContent.Trim()) -eq '') { throw "Settings file is empty: $SettingsFilePath" }
-        # if file does not contain valid json convert will throw error
-        ConvertFrom-Json -InputObject $SettingsContent
+      # settings file exists, validate it
+      # ensure path is a file not a folder
+      if ($false -eq (Test-Path -Path $SettingsFilePath -PathType Leaf)) { throw "Settings file Path is a folder, not a file: $SettingsFilePath" }
+      # ensure file extension is .json
+      if (((Get-Item -Path $SettingsFilePath).Extension) -ne $JsonExtension) { throw "Settings file Path should have .json extension: $SettingsFilePath" }
+      # ensure file is not empty
+      $SettingsContent = Get-Content -Path $SettingsFilePath -Raw
+      if ($null -eq $SettingsContent -or ($SettingsContent.Trim()) -eq '') { throw "Settings file is empty: $SettingsFilePath" }
+      # ensure converting from json to object does not throw exception; if file does not contain valid json convert will throw error
+      $Settings = ConvertFrom-Json -InputObject $SettingsContent
+      # ensure user has filled in correct values in settings (no DEFAULT values)
+      Get-Member -InputObject $Settings -MemberType NoteProperty | Where-Object { $Settings.($_.Name) -eq $Default } | Select-Object Name | ForEach-Object {
+        throw "Settings file property '$($_.Name)' is still set to $Default in: $SettingsFilePath"
       }
+      # got this far? no errors - return settings
+      $Settings
     }
-
   }
 }
 #endregion

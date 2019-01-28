@@ -144,14 +144,21 @@ Describe 'get settings - no file exists in default location - create correctly' 
     Test-Path -Path $TestSettingsFile | Should Be $true
   }
 
-  It 'content about new file is output to host' {
+  It 'information about new settings file is output to host' {
     [object[]]$Output = Get-XYZSettings 6>&1
     $Output.Count | Should Be 3
   }
 
-  It 'output content includes path to settings file' {
+  It 'output information includes path to settings file' {
     [object[]]$Output = Get-XYZSettings 6>&1
     $Output[1] | Should Be $TestSettingsFile
+  }
+
+  It 'new settings file has DEFAULT values' {
+    # first time calling this works - creates file with default values
+    # second time calling throws error because default values have not been edited
+    $null = Get-XYZSettings 6>&1
+    { Get-XYZSettings } | Should throw
   }
 }
 #endregion
