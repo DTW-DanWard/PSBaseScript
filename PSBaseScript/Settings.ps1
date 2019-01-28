@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 
 Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
 
-#region Functions: Get-XYZSettings
+#region Function: Get-XYZSettings
 
 <#
 .SYNOPSIS
@@ -67,7 +67,7 @@ function Get-XYZSettings {
 #endregion
 
 
-#region Functions: Get-XYZSettingsDefaultFilePath
+#region Function: Get-XYZSettingsDefaultFilePath
 
 <#
 .SYNOPSIS
@@ -97,7 +97,7 @@ function Get-XYZSettingsDefaultFilePath {
 #endregion
 
 
-#region Functions: New-XYZSettingsObject
+#region Function: New-XYZSettingsObject
 
 <#
 .SYNOPSIS

@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
 
-#region Functions: Get-XYZSettingsPropertiesPlaintext
+#region Function: Get-XYZSettingsPropertiesPlaintext
 
 <#
 .SYNOPSIS
@@ -24,7 +24,7 @@ function Get-XYZSettingsPropertiesPlaintext {
 #endregion
 
 
-#region Functions: Get-XYZSettingsPropertiesEncrypted
+#region Function: Get-XYZSettingsPropertiesEncrypted
 
 <#
 .SYNOPSIS
@@ -47,5 +47,3 @@ function Get-XYZSettingsPropertiesEncrypted {
   }
 }
 #endregion
-
-

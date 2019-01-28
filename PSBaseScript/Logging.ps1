@@ -46,7 +46,7 @@ function Initialize-XYZLogSettings {
 Initialize-XYZLogSettings
 
 
-#region Functions: Disable-XYZLogFile, Enable-XYZLogFile
+#region Function: Disable-XYZLogFile, Enable-XYZLogFile
 
 <#
 .SYNOPSIS
@@ -118,7 +118,7 @@ function Enable-XYZLogFile {
 #endregion
 
 
-#region Functions: Get-XYZLogFilePath
+#region Function: Get-XYZLogFilePath
 
 <#
 .SYNOPSIS
@@ -141,7 +141,7 @@ function Get-XYZLogFilePath {
 #endregion
 
 
-#region Functions: Write-XYZLog
+#region Function: Write-XYZLog
 
 <#
 .SYNOPSIS
@@ -187,7 +187,7 @@ function Write-XYZLog {
 #endregion
 
 
-#region Functions: Add-XYZLogIndentLevel, Remove-XYZLogIndentLevel
+#region Function: Add-XYZLogIndentLevel, Remove-XYZLogIndentLevel
 
 <#
 .SYNOPSIS
@@ -232,7 +232,7 @@ function Remove-XYZLogIndentLevel {
 #endregion
 
 
-#region Functions: Write-XYZLogHeader, Write-XYZLogFooter
+#region Function: Write-XYZLogHeader, Write-XYZLogFooter
 
 <#
 .SYNOPSIS
@@ -305,7 +305,7 @@ function Write-XYZLogFooter {
 #endregion
 
 
-#region Functions: Convert-XYZFlattenHashtable
+#region Function: Convert-XYZFlattenHashtable
 
 <#
 .SYNOPSIS
