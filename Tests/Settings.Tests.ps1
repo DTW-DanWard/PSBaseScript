@@ -126,6 +126,11 @@ Describe 'get settings - no file exists in default location - create correctly' 
     $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$','.json'
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
     Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
+
+    # 'mock'ing these but not using Mock - throws exception CommandNotFoundException: Could not find Command
+    # as they are in a different file
+    function Get-XYZSettingsPropertiesPlaintext { @('Url','UserName') }
+    function Get-XYZSettingsPropertiesEncrypted { ,@('Password') }
   }
 
   AfterEach {
@@ -140,6 +145,7 @@ Describe 'get settings - no file exists in default location - create correctly' 
   }
 
   It 'file gets created after' {
+    Mock -CommandName 'Get-XYZSettingsPropertiesPlaintext' -MockWith { @('Url','UserName') }
     $null = Get-XYZSettings 6>&1
     Test-Path -Path $TestSettingsFile | Should Be $true
   }

@@ -1,7 +1,5 @@
 Set-StrictMode -Version Latest
 
-. (Join-Path -Path $PSScriptRoot -ChildPath Settings_Client.ps1)
-
 Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
 
 #region Functions: Get-XYZSettings
