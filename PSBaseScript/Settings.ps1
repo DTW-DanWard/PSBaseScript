@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
 
 
-#region Function: Decrypt-XYZSettingsProperties
+#region Function: Convert-XYZDecryptSettingsProperties
 
 <#
 .SYNOPSIS
@@ -14,10 +14,10 @@ properties on property _EncryptedProperties.
 .PARAMETER Settings
 Settings object
 .EXAMPLE
-Decrypt-XYZSettingsProperties $Settings
+Convert-XYZDecryptSettingsProperties $Settings
 <returns settings object with decrypted properties>
 #>
-function Decrypt-XYZSettingsProperties {
+function Convert-XYZDecryptSettingsProperties {
   #region Function parameters
   [CmdletBinding()]
   param(
@@ -96,7 +96,7 @@ function Get-XYZSettings {
         throw "Settings file property '$($_.Name)' is still set to $Default in: $SettingsFilePath"
       }
       # got this far with no errors? decrypt any encrypted properties on Settings and return
-      Decrypt-XYZSettingsProperties -Settings $Settings
+      Convert-XYZDecryptSettingsProperties -Settings $Settings
     }
   }
 }

@@ -229,7 +229,7 @@ Describe 'get settings - file exists in default location, encrypted properties -
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
     $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $TestSettingsFile
     Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
-    
+
     function Convert-XYZDecryptText {
       param([string]$Text)
       if (($PSVersionTable.PSVersion.Major -le 5) -or ($true -eq $IsWindows)) {
