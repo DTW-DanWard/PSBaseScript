@@ -1,5 +1,6 @@
 Set-StrictMode -Version Latest
 
+. (Join-Path -Path $PSScriptRoot -ChildPath Encryption.ps1)
 . (Join-Path -Path $PSScriptRoot -ChildPath Logging.ps1)
 . (Join-Path -Path $PSScriptRoot -ChildPath Settings.ps1)
 . (Join-Path -Path $PSScriptRoot -ChildPath Settings_Client.ps1)

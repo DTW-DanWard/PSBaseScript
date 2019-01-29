@@ -2,6 +2,42 @@ Set-StrictMode -Version Latest
 
 Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
 
+
+#region Function: Decrypt-XYZSettingsProperties
+
+<#
+.SYNOPSIS
+For settings object decrypts any encrypted properties
+.DESCRIPTION
+For settings object decrypts any encrypted properties.  Finds list of encrypted
+properties on property _EncryptedProperties.
+.PARAMETER Settings
+Settings object
+.EXAMPLE
+Decrypt-XYZSettingsProperties $Settings
+<returns settings object with decrypted properties>
+#>
+function Decrypt-XYZSettingsProperties {
+  #region Function parameters
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNullOrEmpty()]
+    [PSCustomObject]$Settings
+  )
+  #endregion
+  process {
+    $Settings._EncryptedProperties | ForEach-Object {
+      # explicitly try/catch so can throw terminating exception
+      try { $Settings.$_ = Convert-XYZDecryptText -Text $Settings.$_ }
+      catch { throw $_ }
+    }
+    $Settings
+  }
+}
+#endregion
+
+
 #region Function: Get-XYZSettings
 
 <#
@@ -59,8 +95,8 @@ function Get-XYZSettings {
       Get-Member -InputObject $Settings -MemberType NoteProperty | Where-Object { $Settings.($_.Name) -eq $Default } | Select-Object Name | ForEach-Object {
         throw "Settings file property '$($_.Name)' is still set to $Default in: $SettingsFilePath"
       }
-      # got this far? no errors - return settings
-      $Settings
+      # got this far with no errors? decrypt any encrypted properties on Settings and return
+      Decrypt-XYZSettingsProperties -Settings $Settings
     }
   }
 }
