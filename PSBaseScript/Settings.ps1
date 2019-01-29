@@ -1,6 +1,8 @@
 Set-StrictMode -Version Latest
 
-Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
+if ($false -eq (Test-Path -Path variable:Default)) {
+  Set-Variable Default -Value 'DEFAULT' -Option ReadOnly -Scope Script
+}
 
 
 #region Function: Convert-XYZDecryptSettingsProperties
@@ -127,7 +129,7 @@ function Get-XYZSettingsDefaultFilePath {
   )
   #endregion
   process {
-    $CallingScriptPath -replace '\.ps1$','.json'
+    $CallingScriptPath -replace '\.ps1$', '.json'
   }
 }
 #endregion
