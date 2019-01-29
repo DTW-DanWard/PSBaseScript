@@ -123,14 +123,14 @@ Describe 'get settings - no file exists in default location - create correctly' 
   BeforeAll {
     $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
     $null = New-Item -ItemType Directory -Path $TestSettingsFolder
-    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$','.json'
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$', '.json'
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
     Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
 
     # 'mock'ing these but not using Mock - throws exception CommandNotFoundException: Could not find Command
     # as they are in a different file
-    function Get-XYZSettingsPropertiesPlaintext { @('Url','UserName') }
-    function Get-XYZSettingsPropertiesEncrypted { ,@('Password') }
+    function Get-XYZSettingsPropertiesPlaintext { @('Url', 'UserName') }
+    function Get-XYZSettingsPropertiesEncrypted { , @('Password') }
   }
 
   AfterEach {
@@ -145,7 +145,7 @@ Describe 'get settings - no file exists in default location - create correctly' 
   }
 
   It 'file gets created after' {
-    Mock -CommandName 'Get-XYZSettingsPropertiesPlaintext' -MockWith { @('Url','UserName') }
+    Mock -CommandName 'Get-XYZSettingsPropertiesPlaintext' -MockWith { @('Url', 'UserName') }
     $null = Get-XYZSettings 6>&1
     Test-Path -Path $TestSettingsFile | Should Be $true
   }
@@ -170,18 +170,20 @@ Describe 'get settings - no file exists in default location - create correctly' 
 #endregion
 
 
-#region Test get settings - file exists in default location - valid
-Describe 'get settings - file exists in default location - valid' {
+#region Test get settings - file exists in default location, no encrypted properties - valid
+Describe 'get settings - file exists in default location, no encrypted properties - valid' {
 
   BeforeAll {
-    $TestValue = 'TESTTEST'
+    $TestValue1 = 'TESTTEST'
+    $TestValue2 = 'More TEST Text HERE'
     $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
     $null = New-Item -ItemType Directory -Path $TestSettingsFolder
     $Settings = [PSCustomObject]@{
-      Prop1 = $TestValue
-      Prop2 = $TestValue
+      Prop1                = $TestValue1
+      Prop2                = $TestValue2
+      _EncryptedProperties = @()
     }
-    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$','.json'
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$', '.json'
     $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
     $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $TestSettingsFile
     Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
@@ -191,8 +193,63 @@ Describe 'get settings - file exists in default location - valid' {
     Get-XYZSettings | Should BeOfType [PSCustomObject]
   }
 
-  It 'settings object property has test value' {
-    (Get-XYZSettings).Prop1 | Should Be $TestValue
+  It 'settings object property 1 has test value' {
+    (Get-XYZSettings).Prop1 | Should BeExactly $TestValue1
+  }
+
+  It 'settings object property 2 has test value' {
+    (Get-XYZSettings).Prop2 | Should BeExactly $TestValue2
+  }
+
+  It 'get settings object does not produce Write-Host output because file exists' {
+    # if file didn't exist would produce multiple lines of content and first test for
+    # PSCustomObject would fail as object produced would be an array with 3 items
+    ([object[]](Get-XYZSettings 6>&1)).Count | Should Be 1
+  }
+}
+#endregion
+
+
+#region Test get settings - file exists in default location, encrypted properties - valid
+Describe 'get settings - file exists in default location, encrypted properties - valid' {
+
+  BeforeAll {
+    $TestValue1 = 'TESTTEST'
+    $TestValue2 = 'More TEST Text HERE'
+    $TestValue2Encrypted = ConvertTo-SecureString -String $TestValue2 -AsPlainText -Force | ConvertFrom-SecureString
+
+    $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
+    $null = New-Item -ItemType Directory -Path $TestSettingsFolder
+    $Settings = [PSCustomObject]@{
+      Prop1                = $TestValue1
+      Prop2                = $TestValue2Encrypted
+      _EncryptedProperties = @('Prop2')
+    }
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$', '.json'
+    $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
+    $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $TestSettingsFile
+    Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
+    
+    function Convert-XYZDecryptText {
+      param([string]$Text)
+      if (($PSVersionTable.PSVersion.Major -le 5) -or ($true -eq $IsWindows)) {
+        Write-Verbose "$($MyInvocation.MyCommand) : Decrypting Text"
+        $Text = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR( ($Text | ConvertTo-SecureString) ))
+      }
+      $Text
+    }
+  }
+
+  It 'returns settings object' {
+    Get-XYZSettings | Should BeOfType [PSCustomObject]
+  }
+
+  It 'settings object property 1 has test value' {
+    (Get-XYZSettings).Prop1 | Should BeExactly $TestValue1
+  }
+
+  It 'settings object property 2 has test value, decrypted' {
+    (Get-XYZSettings).Prop2 | Should BeExactly $TestValue2
   }
 
   It 'get settings object does not produce Write-Host output because file exists' {
