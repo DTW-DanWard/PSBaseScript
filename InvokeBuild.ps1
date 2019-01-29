@@ -63,8 +63,7 @@ task Test Init, {
   }
 
   # Integration tagged tests only run on the native developer machine; not on build server, not in test container
-  # for this project these are tests against the actual docker.exe
-  if (($env:BHBuildSystem -ne 'Unknown') -or ($null -eq (Get-Command -Name 'docker.exe' -ErrorAction SilentlyContinue))) {
+  if (-not (($env:BHBuildSystem -eq 'Unknown') -and ($env:COMPUTERNAME -eq 'PONDSURFACE2'))) {
     $Params.ExcludeTag = @('Integration')
   }
 
@@ -104,7 +103,7 @@ Task Analyze Init, {
   # run script analyzer on all files EXCEPT build files in project root
   Get-ChildItem -Path $ProjectRoot -Recurse | Where-Object { @('.ps1', '.psm1') -contains $_.Extension -and $_.DirectoryName -ne $ProjectRoot } | ForEach-Object {
     # don't worry: Write-Host is *barely* used
-    $Results = Invoke-ScriptAnalyzer -Path $_.FullName -ExcludeRule PSAvoidUsingWriteHost
+    $Results = Invoke-ScriptAnalyzer -Path $_.FullName -ExcludeRule PSAvoidUsingWriteHost,PSAvoidUsingConvertToSecureStringWithPlainText
     if ($null -ne $Results) {
       Write-Build Red "PSScriptAnalyzer found issues in: $($_.Name)"
       $Results | ForEach-Object {
