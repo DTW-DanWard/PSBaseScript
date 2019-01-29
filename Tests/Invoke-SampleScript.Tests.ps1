@@ -29,8 +29,6 @@ Describe 'call basic script - no settings file' {
     if ($true -eq (Test-Path -Path $SourceScript)) {
       Rename-Item -Path $SettingsFile -NewName $SettingsFileBackup
     }
-    Write-Host "FILE RENAMED!" -ForegroundColor Cyan
-    Start-Sleep -Seconds 4
   }
 
   AfterAll {
