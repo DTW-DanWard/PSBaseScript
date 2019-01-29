@@ -14,12 +14,19 @@ Describe "Re/loading: $SourceScript" { }
 #region Encryption - encrypt and decrypt (integration: Dan's machine for consistent encrypt/decrypt values)
 Describe -Tag 'Integration' 'encrypt and decrypt tests (native Windows functionality)' {
 
+  BeforeAll {
+    $script:SkipTest = @{}
+    if (($PSVersionTable.PSVersion.Major -ge 6) -and ($false -eq $IsWindows)) {
+      $script:SkipTest = @{ Skip = $true}
+    }
+  }
+
   It 'encrypting without text input is error' {
     { Convert-XYZEncryptText } | Should throw
   }
 
   # note: this will not work on non-Windows machines
-  It 'encrypted text is different than text input' {
+  It @SkipTest 'encrypted text is different than text input' {
     $TestPlainText = 'ThisIsSampleText'
     Convert-XYZEncryptText -Text $TestPlainText | Should Not Be $TestPlainText
   }
