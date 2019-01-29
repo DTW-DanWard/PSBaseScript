@@ -210,6 +210,42 @@ Describe 'get settings - file exists in default location, no encrypted propertie
 #endregion
 
 
+#region Test get settings - file exists in default location, no encrypted property value but marked encrypted - not valid valid
+Describe 'get settings - file exists in default location, no encrypted property value but marked encrypted - not valid valid' {
+
+  BeforeAll {
+    $TestValue1 = 'TESTTEST'
+    $TestValue2 = 'More TEST Text HERE'
+
+    $TestSettingsFolder = Join-Path -Path $TestDrive -ChildPath SettingsFolder
+    $null = New-Item -ItemType Directory -Path $TestSettingsFolder
+    $Settings = [PSCustomObject]@{
+      Prop1                = $TestValue1
+      Prop2                = $TestValue2
+      _EncryptedProperties = @('Prop2')
+    }
+    $TestSettingsFile = (Split-Path ($MyInvocation.PSCommandPath) -Leaf) -replace '\.ps1$', '.json'
+    $TestSettingsFile = Join-Path -Path $TestSettingsFolder -ChildPath $TestSettingsFile
+    $Settings | ConvertTo-Json -Depth 100 | Out-File -FilePath $TestSettingsFile
+    Mock -CommandName 'Get-XYZSettingsDefaultFilePath' -MockWith { $TestSettingsFile }
+
+    function Convert-XYZDecryptText {
+      param([string]$Text)
+      if (($PSVersionTable.PSVersion.Major -le 5) -or ($true -eq $IsWindows)) {
+        Write-Verbose "$($MyInvocation.MyCommand) : Decrypting Text"
+        $Text = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR( ($Text | ConvertTo-SecureString) ))
+      }
+      $Text
+    }
+  }
+
+  It 'returns settings object fails on incorrectly marked encrypted property' {
+    { Get-XYZSettings } | Should throw
+  }
+}
+#endregion
+
+
 #region Test get settings - file exists in default location, encrypted properties - valid
 Describe 'get settings - file exists in default location, encrypted properties - valid' {
 
