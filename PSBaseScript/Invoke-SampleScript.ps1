@@ -9,18 +9,23 @@ Enable-XYZLogFile C:\temp\Logs
 Write-XYZLogHeader
 
 $Settings = Get-XYZSettings
+
 if ($null -eq $Settings) {
   Write-XYZLog "No settings, exiting."
+  Write-XYZLogFooter
+  Disable-XYZLogFile
   return
 } else {
-  Write-XYZLog "Start: $(Get-Date)"
+  Write-XYZLog "Settings are:"
   Add-XYZLogIndentLevel
-  Write-XYZLog "$(Get-XYZLogFilePath)"
-  Add-XYZLogIndentLevel
-  Write-XYZLog "Hey now!"
+  ($Settings | Get-Member -MemberType NoteProperty).Name | ForEach-Object {
+    Write-XYZLog ($_)
+    Add-XYZLogIndentLevel
+    # use string expansion so properties that are arrays (_EncryptedProperties) are properly displayed
+    Write-XYZLog "$(($Settings.$_))"
+    Remove-XYZLogIndentLevel
+  }
   Remove-XYZLogIndentLevel
-  Remove-XYZLogIndentLevel
-  Write-XYZLog "All done."
 }
 
 Write-XYZLogFooter
