@@ -1,4 +1,5 @@
 param(
+  [ValidateSet('Analyze','Test')]
   [string]$Task = 'Default'
 )
 
